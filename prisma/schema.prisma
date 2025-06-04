@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["filterJson"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Pour les connexions directes (nécessaire pour Neon)
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String
+  emailVerified   Boolean   @default(false)
+  verificationToken String? @unique
+  resetToken      String?   @unique
+  resetTokenExp   DateTime?
+  role            Role      @default(USER)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  sessions        Session[]
+
+  // Sécurité
+  lastLogin       DateTime?
+  failedAttempts  Int       @default(0)
+  lockedUntil     DateTime?
+
+  @@index([email], name: "email_idx")
+  @@map("users")
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId], name: "session_user_idx")
+  @@map("sessions")
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}

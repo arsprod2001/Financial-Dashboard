@@ -14,8 +14,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Fond sombre quasi noir avec teinte bleu nuit */
+    --background: linear-gradient(135deg, #010409, #020c1b, #00040a);
+    --foreground: #e6faff; /* Texte très clair, presque blanc-bleuté */
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 30% 30%, #00ffff33, transparent 60%),
+                radial-gradient(circle at 70% 70%, #00bfff22, transparent 60%);
+    background-repeat: no-repeat;
+    z-index: -1;
+    opacity: 0.12; /* effet néon discret mais visible */
   }
 }
 
@@ -23,4 +38,86 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
+
+/* Effet néon sur les titres */
+h1, h2, h3 {
+  color: #00eaff;
+  text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff44, 0 0 20px #00eaff22;
+}
+
+/* Animation optionnelle du fond */
+@keyframes neonGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+.neon-text {
+  text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff40;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #00eaff !important;
+}
+
+.swiper-pagination-bullet {
+  background: #e5e7eb !important;
+  opacity: 0.5 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: #00eaff !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 10px #00eaff;
+}
+
+
+/* styles/globals.css */
+@media (max-width: 768px) {
+  .MuiDataGrid-virtualScroller {
+    overflow-x: auto !important;
+  }
+  
+  .MuiDataGrid-root .MuiDataGrid-cell {
+    min-width: 150px !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    padding: 8px !important;
+  }
+  
+  .MuiDataGrid-columnHeaders {
+    min-width: 800px !important;
+  }
+  
+  .MuiDataGrid-row {
+    min-width: 800px !important;
+  }
+}
+
+@layer components {
+  .neon-pulse {
+    box-shadow: 
+      0 0 15px theme('colors.cyan.500/10'),
+      0 0 30px theme('colors.cyan.500/5'),
+      0 0 60px theme('colors.cyan.500/3');
+  }
+
+  .neon-pulse:hover {
+    box-shadow: 
+      0 0 25px theme('colors.cyan.500/15'),
+      0 0 50px theme('colors.cyan.500/8'),
+      0 0 100px theme('colors.cyan.500/5');
+  }
+}
+
+canvas {
+  background-color: transparent !important;
+}
+
