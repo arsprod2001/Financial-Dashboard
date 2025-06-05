@@ -5,7 +5,7 @@ import { FiDownload, FiFileText, FiFilter, FiRefreshCw, FiSearch, FiPrinter, FiM
 interface ReportType {
   id: string;
   name: string;
-  icon: JSX.Element;
+  icon: React.ReactElement;
 }
 
 interface Report {

@@ -44,10 +44,10 @@ interface OptimizationItem {
 }
 
 interface KpiAction {
-  title: string;
-  icon: JSX.Element;
-  color: string;
-  onClick: () => void;
+  title: string
+  icon: React.ReactElement
+  color: string
+  onClick: () => void
 }
 
 const ExpenseSummary = () => {

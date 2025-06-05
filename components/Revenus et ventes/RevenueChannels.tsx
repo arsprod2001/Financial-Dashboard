@@ -37,7 +37,7 @@ interface ChartSegment {
   color: string;
   growth: number;
   actions: {
-    icon: JSX.Element;
+    icon: React.ReactElement;
     label: string;
     color: string;
   }[];
