@@ -1,3 +1,5 @@
+
+{/** 
 import React, { useState, useRef, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import {
@@ -338,7 +340,6 @@ const SalesStatistics = () => {
       transition-all duration-300
       neon-glow
     ">
-      {/* Alertes temporaires */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {alerts.map(alert => (
           <div 
@@ -435,7 +436,6 @@ const SalesStatistics = () => {
         </div>
       </div>
 
-      {/* KPI Cards avec actions */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="
           p-4 rounded-xl
@@ -524,7 +524,6 @@ const SalesStatistics = () => {
         </div>
       </div>
 
-      {/* Actions globales */}
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="
           inline-flex items-center
@@ -907,3 +906,15 @@ const SalesStatistics = () => {
 };
 
 export default SalesStatistics;
+
+*/}
+
+import React from 'react'
+
+const SalesStatistics = () => {
+  return (
+    <div></div>
+  )
+}
+
+export default SalesStatistics
