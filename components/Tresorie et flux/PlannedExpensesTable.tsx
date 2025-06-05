@@ -1,14 +1,40 @@
 import React, { useState } from 'react';
 import { FiFilter, FiSearch, FiDownload, FiPlus, FiEdit2, FiTrash2, FiChevronDown } from 'react-icons/fi';
 
+// Définir les types
+type ExpenseStatus = 'Planifié' | 'Payé' | 'En attente' | 'Annulé';
+type ExpenseFrequency = 'Mensuel' | 'Trimestriel' | 'Variable';
+
+interface HistoryItem {
+  date: string;
+  action: string;
+  user: string;
+}
+
+interface Expense {
+  id: number;
+  category: string;
+  amount: string;
+  dueDate: string;
+  status: ExpenseStatus;
+  description: string;
+  account: string;
+  frequency: ExpenseFrequency;
+  attachments: number;
+  history: HistoryItem[];
+}
+
 const PlannedExpensesTable = () => {
-  const [filter, setFilter] = useState('toutes');
+  const [filter, setFilter] = useState<ExpenseStatus | 'toutes'>('toutes');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDetails, setShowDetails] = useState({});
-  const [sortConfig, setSortConfig] = useState({ key: 'dueDate', direction: 'asc' });
+  const [showDetails, setShowDetails] = useState<Record<number, boolean>>({});
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Expense; direction: 'asc' | 'desc' }>({ 
+    key: 'dueDate', 
+    direction: 'asc' 
+  });
 
   // Données pour les dépenses planifiées
-  const expenses = [
+  const expenses: Expense[] = [
     {
       id: 1,
       category: 'Salaires',
@@ -84,27 +110,30 @@ const PlannedExpensesTable = () => {
   ];
 
   // Fonction pour déterminer la couleur du statut
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: ExpenseStatus) => {
     switch (status) {
       case 'Planifié':
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'; // Cyan
+        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
       case 'Payé':
-        return 'bg-green-500/10 text-green-400 border-green-500/30'; // Vert
+        return 'bg-green-500/10 text-green-400 border-green-500/30';
       case 'En attente':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'; // Jaune
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30';
       case 'Annulé':
-        return 'bg-red-500/10 text-red-400 border-red-500/30'; // Rouge
+        return 'bg-red-500/10 text-red-400 border-red-500/30';
       default:
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/30'; // Gris
+        return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
     }
   };
 
   // Fonction de tri
   const sortedExpenses = [...expenses].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+    
+    if (aValue < bValue) {
       return sortConfig.direction === 'asc' ? -1 : 1;
     }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
+    if (aValue > bValue) {
       return sortConfig.direction === 'asc' ? 1 : -1;
     }
     return 0;
@@ -121,8 +150,8 @@ const PlannedExpensesTable = () => {
     );
 
   // Gestion du tri
-  const requestSort = (key) => {
-    let direction = 'asc';
+  const requestSort = (key: keyof Expense) => {
+    let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
@@ -130,7 +159,7 @@ const PlannedExpensesTable = () => {
   };
 
   // Toggle détails
-  const toggleDetails = (id) => {
+  const toggleDetails = (id: number) => {
     setShowDetails(prev => ({
       ...prev,
       [id]: !prev[id]
@@ -180,7 +209,7 @@ const PlannedExpensesTable = () => {
       {/* Contrôles de filtrage */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="flex flex-wrap gap-2">
-          {['toutes', 'Planifié', 'Payé', 'En attente', 'Annulé'].map(status => (
+          {(['toutes', 'Planifié', 'Payé', 'En attente', 'Annulé'] as const).map(status => (
             <button
               key={status}
               onClick={() => setFilter(status)}
@@ -238,7 +267,7 @@ const PlannedExpensesTable = () => {
                 <th 
                   key={header.key}
                   className="px-6 py-3 text-left text-sm font-medium text-cyan-400/80 uppercase tracking-wider cursor-pointer"
-                  onClick={() => header.key !== 'actions' && requestSort(header.key)}
+                  onClick={() => header.key !== 'actions' && requestSort(header.key as keyof Expense)}
                 >
                   <div className="flex items-center">
                     {header.label}
@@ -311,7 +340,7 @@ const PlannedExpensesTable = () => {
                 {/* Détails supplémentaires */}
                 {showDetails[expense.id] && (
                   <tr className="bg-gray-800/40 border-t border-gray-700/50">
-                    <td colSpan="5" className="px-6 py-4">
+                    <td colSpan={5} className="px-6 py-4">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <div className="text-cyan-400/80 mb-1">Compte</div>

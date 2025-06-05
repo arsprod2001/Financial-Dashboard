@@ -16,7 +16,7 @@ const TotalExpensesKPI = ({ expenses = 8500, comparison = -3 }) => {
         w-full max-w-xs
         neon-glow-red
       "
-      tabIndex="0"
+      tabIndex={0}
     >
       <div className="absolute top-0 inset-x-0 h-1 rounded-t-xl bg-gradient-to-r from-red-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 

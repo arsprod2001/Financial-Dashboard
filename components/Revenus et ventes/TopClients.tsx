@@ -5,8 +5,6 @@ import ClientDetailsModal from "@/components/ClientDetailsModal";
 import ClientsListModal from "@/components/ClientsListModal";
 
 
-
-
 const TopClients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenDetails, setIsModalOpenDetails] = useState(false);

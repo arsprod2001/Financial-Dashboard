@@ -6,6 +6,8 @@ import {
   ArcElement,
   Tooltip,
   Legend,
+  TooltipItem,
+  ChartOptions
 } from 'chart.js';
 
 ChartJS.register(
@@ -14,12 +16,28 @@ ChartJS.register(
   Legend
 );
 
+// Définition des types
+type InvoiceStatus = 'payée' | 'en attente' | 'en retard' | 'partiellement payée';
+type TabFilter = 'toutes' | InvoiceStatus;
+
+interface Invoice {
+  id: string;
+  client: string;
+  amount: string;
+  issuedDate: string;
+  dueDate: string;
+  status: InvoiceStatus;
+  paid: string;
+  balance: string;
+  daysOverdue: number;
+}
+
 const BillingPaymentDashboard = () => {
-  const [activeTab, setActiveTab] = useState('toutes');
+  const [activeTab, setActiveTab] = useState<TabFilter>('toutes');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const neonColors = {
     cyan: '#00f3ff',
@@ -52,7 +70,8 @@ const BillingPaymentDashboard = () => {
     ],
   };
 
-  const chartOptions = {
+  // Correction du type pour les options du graphique
+  const chartOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -67,6 +86,7 @@ const BillingPaymentDashboard = () => {
           },
           padding: 20,
           usePointStyle: true,
+          // propriétés optionnelles ignorées ici
         }
       },
       tooltip: {
@@ -77,8 +97,22 @@ const BillingPaymentDashboard = () => {
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
+        displayColors: true,
+        usePointStyle: true,
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed} factures (${Math.round(ctx.parsed)}%)`
+          label: (ctx: TooltipItem<'pie'>) =>
+            ` ${ctx.parsed} factures (${Math.round(ctx.parsed)}%)`,
+          // Fournir les autres callbacks (même vides pour satisfaire TS)
+          title: () => '',
+          afterTitle: () => '',
+          beforeTitle: () => '',
+          beforeBody: () => '',
+          afterBody: () => '',
+          beforeLabel: () => '',
+          afterLabel: () => '',
+          footer: () => '',
+          beforeFooter: () => '',
+          afterFooter: () => ''
         }
       }
     },
@@ -88,8 +122,7 @@ const BillingPaymentDashboard = () => {
       duration: 1000
     }
   };
-
-  const invoices = [
+  const invoices: Invoice[] = [
     {
       id: 'INV-2023-001',
       client: 'Client Alpha',
@@ -159,9 +192,9 @@ const BillingPaymentDashboard = () => {
   ];
 
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = invoice.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          invoice.client.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch = invoice.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      invoice.client.toLowerCase().includes(searchQuery.toLowerCase());
+
     if (activeTab === 'toutes') return matchesSearch;
     return matchesSearch && invoice.status === activeTab;
   });
@@ -170,9 +203,9 @@ const BillingPaymentDashboard = () => {
     const totalInvoices = invoices.length;
     const paidInvoices = invoices.filter(i => i.status === 'payée').length;
     const overdueInvoices = invoices.filter(i => i.status === 'en retard').length;
-    const totalAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace(' ', '').replace(',', '.').replace('$', '')), 0);
-    const outstandingAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.balance.replace(' ', '').replace(',', '.').replace('$', '')), 0);
-    
+    const totalAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace(/\s/g, '').replace(',', '.').replace('$', '')), 0);
+    const outstandingAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.balance.replace(/\s/g, '').replace(',', '.').replace('$', '')), 0);
+
     return {
       totalInvoices,
       paidInvoices,
@@ -185,15 +218,15 @@ const BillingPaymentDashboard = () => {
 
   const kpis = calculateKPIs();
 
-  const handleViewInvoice = (invoice) => {
+  const handleViewInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
   };
 
-  const handleSendReminder = (invoice) => {
+  const handleSendReminder = (invoice: Invoice) => {
     alert(`Rappel envoyé pour la facture ${invoice.id} à ${invoice.client}`);
   };
 
-  const handleCreatePayment = (invoice) => {
+  const handleCreatePayment = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setShowPaymentModal(true);
   };
@@ -210,28 +243,28 @@ const BillingPaymentDashboard = () => {
     alert('Données actualisées');
   };
 
-  const renderActions = (invoice) => (
+  const renderActions = (invoice: Invoice) => (
     <div className="flex space-x-1">
-      <button 
+      <button
         onClick={() => handleViewInvoice(invoice)}
         className="p-1.5 rounded-md bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
         title="Voir détails"
       >
         <FiEye size={16} />
       </button>
-      <button 
+      <button
         className="p-1.5 rounded-md bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
         title="Télécharger"
       >
         <FiDownload size={16} />
       </button>
-      <button 
+      <button
         className="p-1.5 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors"
         title="Envoyer par email"
       >
         <FiMail size={16} />
       </button>
-      <button 
+      <button
         className="p-1.5 rounded-md bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors"
         title="Imprimer"
       >
@@ -239,14 +272,14 @@ const BillingPaymentDashboard = () => {
       </button>
       {invoice.status !== 'payée' && (
         <>
-          <button 
+          <button
             onClick={() => handleSendReminder(invoice)}
             className="p-1.5 rounded-md bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 transition-colors"
             title="Envoyer un rappel"
           >
             <FiClock size={16} />
           </button>
-          <button 
+          <button
             onClick={() => handleCreatePayment(invoice)}
             className="p-1.5 rounded-md bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
             title="Enregistrer un paiement"
@@ -258,14 +291,14 @@ const BillingPaymentDashboard = () => {
     </div>
   );
 
-  const renderStatusBadge = (status) => {
-    const statusStyles = {
+  const renderStatusBadge = (status: InvoiceStatus) => {
+    const statusStyles: Record<InvoiceStatus, string> = {
       'payée': 'bg-green-500/10 text-green-400 border-green-500/30',
       'en attente': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
       'en retard': 'bg-pink-500/10 text-pink-400 border-pink-500/30',
       'partiellement payée': 'bg-blue-500/10 text-blue-400 border-blue-500/30'
     };
-    
+
     return (
       <span className={`px-2 py-1 rounded-full text-xs border ${statusStyles[status]}`}>
         {status}
@@ -296,9 +329,9 @@ const BillingPaymentDashboard = () => {
             <span>Gestion des factures et suivi des paiements</span>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
-          <button 
+          <button
             onClick={handleCreateInvoice}
             className="
               p-2 rounded-lg
@@ -313,8 +346,8 @@ const BillingPaymentDashboard = () => {
             <FiPlus className="mr-2" />
             Nouvelle facture
           </button>
-          
-          <button 
+
+          <button
             onClick={handleExportAll}
             className="
               p-2 rounded-lg
@@ -329,8 +362,8 @@ const BillingPaymentDashboard = () => {
             <FiDownload className="mr-2" />
             Exporter
           </button>
-          
-          <button 
+
+          <button
             onClick={handleRefresh}
             className="
               p-2 rounded-lg
@@ -363,7 +396,7 @@ const BillingPaymentDashboard = () => {
             Ce mois-ci
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-green-900/30 to-emerald-900/30
@@ -378,7 +411,7 @@ const BillingPaymentDashboard = () => {
             Taux de paiement
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-pink-900/30 to-rose-900/30
@@ -393,7 +426,7 @@ const BillingPaymentDashboard = () => {
             À relancer
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-yellow-900/30 to-amber-900/30
@@ -417,7 +450,7 @@ const BillingPaymentDashboard = () => {
             <Pie data={statusData} options={chartOptions} />
           </div>
         </div>
-        
+
         <div className="lg:col-span-2 bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Barre de recherche */}
@@ -433,24 +466,23 @@ const BillingPaymentDashboard = () => {
                 className="w-full pl-10 pr-3 py-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
               />
             </div>
-            
+
             <div className="flex flex-wrap gap-2">
               {['toutes', 'payée', 'en attente', 'en retard', 'partiellement payée'].map(filter => (
                 <button
                   key={filter}
-                  onClick={() => setActiveTab(filter)}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-                    activeTab === filter
+                  onClick={() => setActiveTab(filter as TabFilter)}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-all ${activeTab === filter
                       ? 'bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-400 border border-purple-500/50'
                       : 'bg-gray-800/40 text-purple-400/60 border border-purple-500/20 hover:bg-purple-500/10'
-                  }`}
+                    }`}
                 >
                   {filter.charAt(0).toUpperCase() + filter.slice(1)}
                 </button>
               ))}
             </div>
           </div>
-          
+
           {/* Actions groupées */}
           <div className="mt-4 flex flex-wrap gap-2">
             <button className="px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all flex items-center text-sm">
@@ -487,8 +519,8 @@ const BillingPaymentDashboard = () => {
             </thead>
             <tbody>
               {filteredInvoices.map((invoice) => (
-                <tr 
-                  key={invoice.id} 
+                <tr
+                  key={invoice.id}
                   className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors"
                 >
                   <td className="py-3 px-4 font-medium text-cyan-300">{invoice.id}</td>
@@ -509,11 +541,10 @@ const BillingPaymentDashboard = () => {
                     {renderStatusBadge(invoice.status)}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <span className={`font-medium ${
-                      invoice.balance === '0,00 $' 
-                        ? 'text-green-400' 
+                    <span className={`font-medium ${invoice.balance === '0,00 $'
+                        ? 'text-green-400'
                         : 'text-yellow-400'
-                    }`}>
+                      }`}>
                       {invoice.balance}
                     </span>
                   </td>
@@ -525,7 +556,7 @@ const BillingPaymentDashboard = () => {
             </tbody>
           </table>
         </div>
-        
+
         {filteredInvoices.length === 0 && (
           <div className="py-12 text-center text-cyan-400/60">
             Aucune facture trouvée pour votre recherche
@@ -560,7 +591,7 @@ const BillingPaymentDashboard = () => {
             <h3 className="text-xl font-bold text-cyan-400 mb-4">
               Enregistrer un paiement pour {selectedInvoice.id}
             </h3>
-            
+
             <div className="mb-4">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
@@ -576,7 +607,7 @@ const BillingPaymentDashboard = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm text-cyan-400/80 mb-1">Montant à payer</label>
                 <input
@@ -585,7 +616,7 @@ const BillingPaymentDashboard = () => {
                   className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm text-cyan-400/80 mb-1">Méthode de paiement</label>
                 <select className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
@@ -596,7 +627,7 @@ const BillingPaymentDashboard = () => {
                   <option>Chèque</option>
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm text-cyan-400/80 mb-1">Date du paiement</label>
                 <input
@@ -605,15 +636,15 @@ const BillingPaymentDashboard = () => {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3">
-              <button 
+              <button
                 onClick={() => setShowPaymentModal(false)}
                 className="px-4 py-2 rounded-lg bg-gray-700/50 text-cyan-400 border border-cyan-500/30 hover:bg-gray-700 transition-all"
               >
                 Annuler
               </button>
-              <button 
+              <button
                 className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30 hover:from-green-500/30 hover:to-emerald-500/30 transition-all"
               >
                 <FiCheckCircle className="inline mr-2" />
@@ -631,7 +662,7 @@ const BillingPaymentDashboard = () => {
             <h3 className="text-xl font-bold text-cyan-400 mb-4">
               Créer une nouvelle facture
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm text-cyan-400/80 mb-1">Client</label>
@@ -643,23 +674,23 @@ const BillingPaymentDashboard = () => {
                   <option>Client Delta</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm text-cyan-400/80 mb-1">Date d'émission</label>
+                <label className="block text-sm text-cyan-400/80 mb-1">{"Date d'émission"}</label>
                 <input
                   type="date"
                   className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm text-cyan-400/80 mb-1">Date d'échéance</label>
+                <label className="block text-sm text-cyan-400/80 mb-1">{"Date d'échéance"}</label>
                 <input
                   type="date"
                   className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm text-cyan-400/80 mb-1">Devise</label>
                 <select className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
@@ -669,29 +700,29 @@ const BillingPaymentDashboard = () => {
                 </select>
               </div>
             </div>
-            
+
             <div className="mb-6">
               <h4 className="text-md font-bold text-cyan-400 mb-3">Articles</h4>
               <div className="space-y-3">
                 <div className="grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-5">
-                    <input 
-                      type="text" 
-                      placeholder="Description" 
+                    <input
+                      type="text"
+                      placeholder="Description"
                       className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg"
                     />
                   </div>
                   <div className="col-span-2">
-                    <input 
-                      type="number" 
-                      placeholder="Quantité" 
+                    <input
+                      type="number"
+                      placeholder="Quantité"
                       className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg"
                     />
                   </div>
                   <div className="col-span-2">
-                    <input 
-                      type="text" 
-                      placeholder="Prix unitaire" 
+                    <input
+                      type="text"
+                      placeholder="Prix unitaire"
                       className="w-full p-2 bg-gray-900/50 border border-cyan-500/30 text-cyan-400 rounded-lg"
                     />
                   </div>
@@ -709,7 +740,7 @@ const BillingPaymentDashboard = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="flex justify-between">
               <div>
                 <button className="text-cyan-400 hover:text-cyan-300 flex items-center">
@@ -721,9 +752,9 @@ const BillingPaymentDashboard = () => {
                 <div className="text-sm text-cyan-400/60">TVA non applicable, art. 293 B du CGI</div>
               </div>
             </div>
-            
+
             <div className="mt-6 flex justify-end space-x-3">
-              <button 
+              <button
                 onClick={() => setShowCreateModal(false)}
                 className="px-4 py-2 rounded-lg bg-gray-700/50 text-cyan-400 border border-cyan-500/30 hover:bg-gray-700 transition-all"
               >

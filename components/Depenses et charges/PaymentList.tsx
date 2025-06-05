@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
-import { FiSearch, FiFilter, FiDownload, FiPrinter, FiEye, FiDollarSign, FiCalendar, FiUser } from 'react-icons/fi';
+import { FiSearch, FiDownload, FiPrinter, FiEye, FiDollarSign, FiCalendar, FiUser } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+
+// Définir les types
+type PaymentStatus = 'payé' | 'en attente' | 'annulé';
+type FilterOption = 'all' | 'paid' | 'pending' | 'cancelled';
+
+interface Payment {
+  id: number;
+  supplier: string;
+  date: string;
+  amount: string;
+  status: PaymentStatus;
+  method: string;
+  category: string;
+  invoice: string;
+}
 
 const PaymentList = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [filter, setFilter] = useState<FilterOption>('all');
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
-  const payments = [
+  const payments: Payment[] = [
     {
       id: 1,
       supplier: 'Fournisseur A',
@@ -72,7 +87,7 @@ const PaymentList = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: PaymentStatus) => {
     switch (status) {
       case 'payé':
         return 'bg-green-500/20 text-green-400 border-green-500/30';
@@ -172,7 +187,7 @@ const PaymentList = () => {
           ].map(item => (
             <button
               key={item.id}
-              onClick={() => setFilter(item.id)}
+              onClick={() => setFilter(item.id as FilterOption)}
               className={`
                 px-4 py-2 rounded-lg transition-all
                 ${filter === item.id 

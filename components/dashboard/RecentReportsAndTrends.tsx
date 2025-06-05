@@ -9,6 +9,8 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartOptions,
+  ChartData,
 } from 'chart.js';
 
 ChartJS.register(
@@ -23,7 +25,8 @@ ChartJS.register(
 );
 
 const RecentReportsAndTrends = () => {
-  const profitMarginData = {
+  // Définir le type pour les données du graphique
+  const profitMarginData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [{
       label: 'Marge bénéficiaire (%)',
@@ -37,7 +40,7 @@ const RecentReportsAndTrends = () => {
     }],
   };
 
-  const profitabilityData = {
+  const profitabilityData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [{
       label: 'Rentabilité (k€)',
@@ -51,7 +54,8 @@ const RecentReportsAndTrends = () => {
     }],
   };
 
-  const chartOptions = {
+  // Configuration de base pour les graphiques
+  const baseChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -80,8 +84,34 @@ const RecentReportsAndTrends = () => {
         ticks: { color: '#00f3ff', font: { weight: 'bold' } }
       }
     },
+    // Correction de la configuration d'animation
     animation: {
-      tension: { duration: 1000, easing: 'easeOutCubic', from: 0.5, to: 0.4 }
+      duration: 1000,
+      easing: 'easeOutCubic'
+    }
+  };
+
+  // Options spécifiques pour chaque graphique
+  const marginChartOptions: ChartOptions<'line'> = {
+    ...baseChartOptions,
+    plugins: {
+      ...baseChartOptions.plugins,
+      title: { 
+        ...baseChartOptions.plugins?.title,
+        text: 'ÉVOLUTION MENSUELLE' 
+      }
+    }
+  };
+
+  const profitabilityChartOptions: ChartOptions<'line'> = {
+    ...baseChartOptions,
+    plugins: {
+      ...baseChartOptions.plugins,
+      title: { 
+        ...baseChartOptions.plugins?.title,
+        text: 'PERFORMANCE FINANCIÈRE',
+        color: '#bc00ff' // Couleur spécifique pour ce graphique
+      }
     }
   };
 
@@ -97,13 +127,7 @@ const RecentReportsAndTrends = () => {
           <div className="h-40">
             <Line 
               data={profitMarginData} 
-              options={{
-                ...chartOptions,
-                plugins: {
-                  ...chartOptions.plugins,
-                  title: { ...chartOptions.plugins.title, text: 'ÉVOLUTION MENSUELLE' }
-                }
-              }} 
+              options={marginChartOptions} 
             />
           </div>
         </div>
@@ -113,13 +137,7 @@ const RecentReportsAndTrends = () => {
           <div className="h-40">
             <Line 
               data={profitabilityData} 
-              options={{
-                ...chartOptions,
-                plugins: {
-                  ...chartOptions.plugins,
-                  title: { ...chartOptions.plugins.title, text: 'PERFORMANCE FINANCIÈRE' }
-                }
-              }} 
+              options={profitabilityChartOptions} 
             />
           </div>
         </div>

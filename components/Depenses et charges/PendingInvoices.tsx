@@ -1,19 +1,32 @@
 import React, { useState } from 'react';
-import { FiAlertCircle, FiCalendar, FiDollarSign, FiSend, FiClock, FiRefreshCw, FiDownload, FiPrinter } from 'react-icons/fi';
+import { FiAlertCircle, FiCalendar, FiSend, FiRefreshCw, FiDownload, FiPrinter } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
+// Définir les types
+type InvoiceStatus = 'en attente' | 'en retard';
+interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  dueDate: string;
+  amount: string;
+  client: string;
+  status: InvoiceStatus;
+  reminders: number;
+  daysOverdue: number;
+}
+
 const PendingInvoices = () => {
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [reminderSent, setReminderSent] = useState(false);
-  
-  const invoices = [
+
+  const invoices: Invoice[] = [
     {
       id: 1,
       invoiceNumber: 'INV-12345',
       dueDate: '2023-10-10',
       amount: '1 200,00 $',
       client: 'Client A',
-      status: 'en retard', 
+      status: 'en retard',
       reminders: 1,
       daysOverdue: 5,
     },
@@ -59,7 +72,7 @@ const PendingInvoices = () => {
     },
   ];
 
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: InvoiceStatus) => {
     switch (status) {
       case 'en attente':
         return 'bg-gradient-to-r from-yellow-500/20 to-amber-600/20 text-yellow-400 border-yellow-500/40';
@@ -70,15 +83,23 @@ const PendingInvoices = () => {
     }
   };
 
-  const sendReminder = (invoiceId) => {
+  const sendReminder = (invoiceId: number) => {
     setReminderSent(true);
     setTimeout(() => setReminderSent(false), 3000);
     console.log(`Relance envoyée pour la facture ${invoiceId}`);
   };
 
   const totalPending = invoices.reduce((sum, invoice) => {
-    return sum + parseFloat(invoice.amount.replace(' ', '').replace(',', '.').replace('$', ''));
+    // Convertir le montant en nombre
+    const amountValue = parseFloat(
+      invoice.amount
+        .replace(/\s/g, '')   // Supprimer les espaces
+        .replace(',', '.')    // Remplacer la virgule par un point
+        .replace('$', '')     // Supprimer le symbole dollar
+    );
+    return sum + (isNaN(amountValue) ? 0 : amountValue);
   }, 0);
+
 
   return (
     <div className="
@@ -98,13 +119,13 @@ const PendingInvoices = () => {
           ">
             FACTURES EN ATTENTE
           </h2>
-          
+
           <div className="mt-2 flex items-center text-cyan-400/80">
             <FiAlertCircle className="mr-2" />
             <span>Suivi des paiements clients en attente</span>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
           <button className="
             p-2 rounded-lg
@@ -118,7 +139,7 @@ const PendingInvoices = () => {
             <FiRefreshCw className="mr-2" />
             Actualiser
           </button>
-          
+
           <button className="
             p-2 rounded-lg
             bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20
@@ -146,7 +167,7 @@ const PendingInvoices = () => {
             {totalPending.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-yellow-900/30 to-amber-900/30
@@ -158,7 +179,7 @@ const PendingInvoices = () => {
             {invoices.filter(i => i.status === 'en attente').length}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-red-900/30 to-rose-900/30
@@ -170,7 +191,7 @@ const PendingInvoices = () => {
             {invoices.filter(i => i.status === 'en retard').length}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-pink-900/30 to-fuchsia-900/30
@@ -214,7 +235,7 @@ const PendingInvoices = () => {
           </thead>
           <tbody className="divide-y divide-cyan-500/10">
             {invoices.map((invoice) => (
-              <motion.tr 
+              <motion.tr
                 key={invoice.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -248,18 +269,17 @@ const PendingInvoices = () => {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center">
-                    <span className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                      invoice.reminders > 0 
-                        ? 'bg-red-500/20 text-red-400' 
+                    <span className={`w-8 h-8 flex items-center justify-center rounded-full ${invoice.reminders > 0
+                        ? 'bg-red-500/20 text-red-400'
                         : 'bg-gray-700/50 text-gray-500'
-                    }`}>
+                      }`}>
                       {invoice.reminders}
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex space-x-2">
-                    <button 
+                    <button
                       onClick={() => sendReminder(invoice.id)}
                       className="
                         p-2 rounded-md
@@ -272,8 +292,8 @@ const PendingInvoices = () => {
                     >
                       <FiSend className="w-5 h-5" />
                     </button>
-                    
-                    <button 
+
+                    <button
                       onClick={() => setSelectedInvoice(invoice)}
                       className="
                         p-2 rounded-md
@@ -309,7 +329,7 @@ const PendingInvoices = () => {
       {/* Modal de détail de la facture */}
       {selectedInvoice && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="
@@ -323,23 +343,23 @@ const PendingInvoices = () => {
                 <h3 className="text-xl font-bold text-cyan-400">Détails de la facture</h3>
                 <div className="text-cyan-400/70 mt-1">{selectedInvoice.invoiceNumber}</div>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedInvoice(null)}
                 className="text-cyan-400 hover:text-cyan-300 text-2xl"
               >
                 ×
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="space-y-4">
                 <div>
                   <div className="text-cyan-400/80">Client</div>
                   <div className="text-lg font-bold text-cyan-300">{selectedInvoice.client}</div>
                 </div>
-                
+
                 <div>
-                  <div className="text-cyan-400/80">Date d'échéance</div>
+                  <div className="text-cyan-400/80">{"Date d'échéance"}</div>
                   <div className="flex items-center text-lg text-cyan-300">
                     <FiCalendar className="mr-2" />
                     {selectedInvoice.dueDate}
@@ -350,7 +370,7 @@ const PendingInvoices = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="text-cyan-400/80">Statut</div>
                   <div className="flex items-center">
@@ -360,13 +380,13 @@ const PendingInvoices = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <div className="text-cyan-400/80">Montant</div>
                   <div className="text-2xl font-bold text-cyan-400">{selectedInvoice.amount}</div>
                 </div>
-                
+
                 <div>
                   <div className="text-cyan-400/80">Relances envoyées</div>
                   <div className="text-lg text-cyan-300 flex items-center">
@@ -376,22 +396,22 @@ const PendingInvoices = () => {
                     fois
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="text-cyan-400/80">Dernière relance</div>
                   <div className="text-cyan-300">
-                    {selectedInvoice.reminders > 0 
-                      ? '2023-10-18' 
+                    {selectedInvoice.reminders > 0
+                      ? '2023-10-18'
                       : 'Aucune relance envoyée'}
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6 pt-6 border-t border-cyan-500/30">
               <h4 className="text-lg font-bold text-cyan-400 mb-4">Actions</h4>
               <div className="flex flex-wrap gap-3">
-                <button 
+                <button
                   onClick={() => sendReminder(selectedInvoice.id)}
                   className="
                     px-4 py-2 rounded-lg
@@ -406,7 +426,7 @@ const PendingInvoices = () => {
                   <FiSend className="mr-2" />
                   Envoyer un rappel
                 </button>
-                
+
                 <button className="
                   px-4 py-2 rounded-lg
                   bg-gradient-to-r from-cyan-500/20 to-blue-500/20
@@ -419,7 +439,7 @@ const PendingInvoices = () => {
                   <FiDownload className="mr-2" />
                   Télécharger la facture
                 </button>
-                
+
                 <button className="
                   px-4 py-2 rounded-lg
                   bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20

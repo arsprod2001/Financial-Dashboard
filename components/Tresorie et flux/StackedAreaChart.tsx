@@ -10,6 +10,8 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartData,
+  ChartOptions
 } from 'chart.js';
 import { FiFilter, FiRefreshCw, FiDownload, FiChevronDown } from 'react-icons/fi';
 
@@ -28,8 +30,13 @@ ChartJS.register(
 const StackedAreaChart = () => {
   const [period, setPeriod] = useState('mois');
   const [showDetails, setShowDetails] = useState(false);
-  const chartRef = useRef(null);
-  const [gradients, setGradients] = useState({});
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  type GradientsType = {
+    income?: CanvasGradient;
+    expenses?: CanvasGradient;
+  };
+  const [gradients, setGradients] = useState<GradientsType>({});
 
   // Couleurs néon
   const neonColors = {
@@ -40,37 +47,43 @@ const StackedAreaChart = () => {
     yellow: '#ffd700'
   };
 
+  
+
   // Fonction pour créer les gradients
   useEffect(() => {
-    if (chartRef.current) {
-      const ctx = chartRef.current.ctx;
-      
-      // Gradient pour les entrées
-      const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
-      incomeGradient.addColorStop(0, `${neonColors.green}60`);
-      incomeGradient.addColorStop(1, `${neonColors.green}10`);
-      
-      // Gradient pour les sorties
-      const expensesGradient = ctx.createLinearGradient(0, 0, 0, 400);
-      expensesGradient.addColorStop(0, `${neonColors.pink}60`);
-      expensesGradient.addColorStop(1, `${neonColors.pink}10`);
-      
-      setGradients({
-        income: incomeGradient,
-        expenses: expensesGradient
-      });
+    if (containerRef.current) {
+      const canvas = containerRef.current.querySelector('canvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Gradient pour les entrées
+          const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
+          incomeGradient.addColorStop(0, `${neonColors.green}60`);
+          incomeGradient.addColorStop(1, `${neonColors.green}10`);
+
+          // Gradient pour les sorties
+          const expensesGradient = ctx.createLinearGradient(0, 0, 0, 400);
+          expensesGradient.addColorStop(0, `${neonColors.pink}60`);
+          expensesGradient.addColorStop(1, `${neonColors.pink}10`);
+
+          setGradients({
+            income: incomeGradient,
+            expenses: expensesGradient
+          });
+        }
+      }
     }
   }, [period]);
 
   // Données pour les entrées et sorties
-  const monthlyData = {
+  const monthlyData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
         label: 'Entrées (k€)',
         data: [120, 150, 180, 200, 170, 220, 210],
         borderColor: neonColors.green,
-        backgroundColor: gradients.income,
+        backgroundColor: gradients.income || `${neonColors.green}60`,
         fill: true,
         tension: 0.4,
         pointRadius: 4,
@@ -83,7 +96,7 @@ const StackedAreaChart = () => {
         label: 'Sorties (k€)',
         data: [80, 90, 100, 110, 95, 105, 100],
         borderColor: neonColors.pink,
-        backgroundColor: gradients.expenses,
+        backgroundColor: gradients.expenses || `${neonColors.pink}60`,
         fill: true,
         tension: 0.4,
         pointRadius: 4,
@@ -95,14 +108,14 @@ const StackedAreaChart = () => {
     ],
   };
 
-  const quarterlyData = {
+  const quarterlyData: ChartData<'line'> = {
     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
     datasets: [
       {
         label: 'Entrées (k€)',
         data: [500, 600, 550, 700],
         borderColor: neonColors.green,
-        backgroundColor: gradients.income,
+        backgroundColor: gradients.income || `${neonColors.green}60`,
         fill: true,
         tension: 0.4,
       },
@@ -110,21 +123,21 @@ const StackedAreaChart = () => {
         label: 'Sorties (k€)',
         data: [300, 350, 400, 450],
         borderColor: neonColors.pink,
-        backgroundColor: gradients.expenses,
+        backgroundColor: gradients.expenses || `${neonColors.pink}60`,
         fill: true,
         tension: 0.4,
       },
     ],
   };
 
-  const yearlyData = {
+  const yearlyData: ChartData<'line'> = {
     labels: ['2021', '2022', '2023'],
     datasets: [
       {
         label: 'Entrées (k€)',
         data: [2000, 2500, 3000],
         borderColor: neonColors.green,
-        backgroundColor: gradients.income,
+        backgroundColor: gradients.income || `${neonColors.green}60`,
         fill: true,
         tension: 0.4,
       },
@@ -132,7 +145,7 @@ const StackedAreaChart = () => {
         label: 'Sorties (k€)',
         data: [1500, 1800, 2000],
         borderColor: neonColors.pink,
-        backgroundColor: gradients.expenses,
+        backgroundColor: gradients.expenses || `${neonColors.pink}60`,
         fill: true,
         tension: 0.4,
       },
@@ -140,7 +153,7 @@ const StackedAreaChart = () => {
   };
 
   // Fonction pour sélectionner les données
-  const getChartData = () => {
+  const getChartData = (): ChartData<'line'> => {
     switch (period) {
       case 'mois': return monthlyData;
       case 'trimestre': return quarterlyData;
@@ -150,7 +163,7 @@ const StackedAreaChart = () => {
   };
 
   // Options pour le graphique en aires empilées avec style néon
-  const chartOptions = {
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -209,8 +222,7 @@ const StackedAreaChart = () => {
             weight: 'bold',
             size: 11
           }
-        },
-        stacked: true,
+        }
       },
       y: {
         grid: {
@@ -224,37 +236,41 @@ const StackedAreaChart = () => {
             weight: 'bold',
             size: 11
           },
-          callback: (value) => `${value} k€`
-        },
-        stacked: true,
+          callback: (value: number | string) => `${value} k€`
+        }
       }
     },
     animation: {
       duration: 800,
-      easing: 'easeOutQuart'
+      easing: 'easeOutQuad'
     }
   };
 
   // Calcul des indicateurs
   const calculateKPIs = () => {
     const data = getChartData();
-    const incomeData = data.datasets[0].data;
-    const expensesData = data.datasets[1].data;
-    
+    const incomeData = data.datasets[0].data as number[];
+    const expensesData = data.datasets[1].data as number[];
+
     const totalIncome = incomeData.reduce((sum, val) => sum + val, 0);
     const totalExpenses = expensesData.reduce((sum, val) => sum + val, 0);
     const netCashflow = totalIncome - totalExpenses;
-    const cashflowGrowth = period === 'mois' 
-      ? ((incomeData[incomeData.length - 1] - expensesData[expensesData.length - 1]) - 
-         (incomeData[incomeData.length - 2] - expensesData[expensesData.length - 2])) / 
-         (incomeData[incomeData.length - 2] - expensesData[expensesData.length - 2]) * 100
-      : 0;
-    
+
+    let cashflowGrowth = 0;
+    if (period === 'mois' && incomeData.length > 1 && expensesData.length > 1) {
+      const prevNet = (incomeData[incomeData.length - 2] || 0) - (expensesData[expensesData.length - 2] || 0);
+      const currentNet = (incomeData[incomeData.length - 1] || 0) - (expensesData[expensesData.length - 1] || 0);
+
+      if (prevNet !== 0) {
+        cashflowGrowth = ((currentNet - prevNet) / prevNet) * 100;
+      }
+    }
+
     return {
-      totalIncome: `${totalIncome} k€`,
-      totalExpenses: `${totalExpenses} k€`,
-      netCashflow: `${netCashflow} k€`,
-      cashflowGrowth: cashflowGrowth.toFixed(1)
+      totalIncome,
+      totalExpenses,
+      netCashflow,
+      cashflowGrowth
     };
   };
 
@@ -283,7 +299,7 @@ const StackedAreaChart = () => {
             <span>Évolution des entrées et sorties financières</span>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
           <div className="
             inline-flex items-center
@@ -316,7 +332,7 @@ const StackedAreaChart = () => {
               ))}
             </select>
           </div>
-          
+
           <button className="
             p-2 rounded-lg
             bg-gradient-to-r from-cyan-500/20 to-blue-500/20
@@ -329,7 +345,7 @@ const StackedAreaChart = () => {
             <FiRefreshCw className="mr-2" />
             Actualiser
           </button>
-          
+
           <button className="
             p-2 rounded-lg
             bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20
@@ -355,13 +371,13 @@ const StackedAreaChart = () => {
         ">
           <div className="text-green-400/80">Entrées totales</div>
           <div className="text-2xl font-bold text-green-300 mt-1">
-            {kpis.totalIncome}
+            {kpis.totalIncome.toLocaleString('fr-FR')} k€
           </div>
           <div className="text-sm text-green-400/60 mt-2">
             {period.charAt(0).toUpperCase() + period.slice(1)}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-pink-900/30 to-rose-900/30
@@ -370,13 +386,13 @@ const StackedAreaChart = () => {
         ">
           <div className="text-pink-400/80">Sorties totales</div>
           <div className="text-2xl font-bold text-pink-300 mt-1">
-            {kpis.totalExpenses}
+            {kpis.totalExpenses.toLocaleString('fr-FR')} k€
           </div>
           <div className="text-sm text-pink-400/60 mt-2">
             {period.charAt(0).toUpperCase() + period.slice(1)}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-cyan-900/30 to-blue-900/30
@@ -384,16 +400,15 @@ const StackedAreaChart = () => {
           backdrop-blur-sm
         ">
           <div className="text-cyan-400/80">Cashflow net</div>
-          <div className={`text-2xl font-bold mt-1 ${
-            parseFloat(kpis.netCashflow) >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {kpis.netCashflow}
+          <div className={`text-2xl font-bold mt-1 ${kpis.netCashflow >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+            {kpis.netCashflow.toLocaleString('fr-FR')} k€
           </div>
           <div className="text-sm text-cyan-400/60 mt-2">
             Solde final
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-yellow-900/30 to-amber-900/30
@@ -401,10 +416,9 @@ const StackedAreaChart = () => {
           backdrop-blur-sm
         ">
           <div className="text-yellow-400/80">Croissance</div>
-          <div className={`text-2xl font-bold mt-1 ${
-            parseFloat(kpis.cashflowGrowth) >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {kpis.cashflowGrowth}%
+          <div className={`text-2xl font-bold mt-1 ${kpis.cashflowGrowth >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+            {kpis.cashflowGrowth.toFixed(1)}%
           </div>
           <div className="text-sm text-yellow-400/60 mt-2">
             vs période précédente
@@ -413,9 +427,12 @@ const StackedAreaChart = () => {
       </div>
 
       {/* Graphique en aires empilées */}
-      <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6">
+      <div
+        className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6"
+        ref={containerRef}
+      >
         <div className="h-96">
-          <Line ref={chartRef} data={getChartData()} options={chartOptions} />
+          <Line data={getChartData()} options={chartOptions} />
         </div>
       </div>
 
@@ -423,14 +440,14 @@ const StackedAreaChart = () => {
       <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-purple-400">Analyse détaillée</h3>
-          <button 
+          <button
             onClick={() => setShowDetails(!showDetails)}
             className="text-purple-400 hover:text-purple-300 transition-colors flex items-center"
           >
             {showDetails ? 'Réduire' : 'Développer'} <FiChevronDown className={`ml-1 ${showDetails ? 'transform rotate-180' : ''}`} />
           </button>
         </div>
-        
+
         {showDetails && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Détails des entrées */}
@@ -453,7 +470,7 @@ const StackedAreaChart = () => {
                 ))}
               </div>
             </div>
-            
+
             {/* Détails des sorties */}
             <div className="bg-gray-700/30 rounded-lg border border-pink-500/30 p-4">
               <h4 className="text-lg font-bold text-pink-400 mb-3">Répartition des sorties</h4>
@@ -484,16 +501,16 @@ const StackedAreaChart = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
             <div className="text-cyan-400/80 mb-2">Optimisation des dépenses</div>
-            <div className="text-yellow-300">Réduire les coûts d'infrastructure de 5%</div>
+            <div className="text-yellow-300">{"Réduire les coûts d'infrastructure de 5%"}</div>
             <div className="text-sm text-yellow-400/60 mt-2">Économie potentielle: 7.5 k€</div>
           </div>
-          
+
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
             <div className="text-cyan-400/80 mb-2">Augmentation des revenus</div>
             <div className="text-yellow-300">Développer les ventes de services</div>
             <div className="text-sm text-yellow-400/60 mt-2">Potentiel: +15% sur 6 mois</div>
           </div>
-          
+
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
             <div className="text-cyan-400/80 mb-2">Investissement stratégique</div>
             <div className="text-yellow-300">Allouer 20 k€ à la R&D</div>

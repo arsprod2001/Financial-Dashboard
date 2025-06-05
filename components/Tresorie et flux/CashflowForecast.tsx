@@ -10,8 +10,10 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartData,
+  ChartOptions
 } from 'chart.js';
-import { FiFilter, FiRefreshCw, FiDownload, FiChevronDown, FiTrendingUp } from 'react-icons/fi';
+import { FiRefreshCw, FiDownload, FiChevronDown, FiTrendingUp } from 'react-icons/fi';
 
 // Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
@@ -25,12 +27,20 @@ ChartJS.register(
   Filler
 );
 
+type ScenarioType = 'optimiste' | 'realiste' | 'pessimiste';
+type PeriodType = 'mois' | 'trimestre' | 'année';
+
 const CashflowForecast = () => {
-  const [period, setPeriod] = useState('mois');
+  const [period, setPeriod] = useState<PeriodType>('mois');
   const [showScenario, setShowScenario] = useState(false);
-  const [activeScenario, setActiveScenario] = useState('optimiste');
-  const chartRef = useRef(null);
-  const [gradients, setGradients] = useState({});
+  const [activeScenario, setActiveScenario] = useState<ScenarioType>('optimiste');
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  type GradientsType = {
+    income?: CanvasGradient;
+    expenses?: CanvasGradient;
+  };
+  const [gradients, setGradients] = useState<GradientsType>({});
 
   // Couleurs néon
   const neonColors = {
@@ -44,28 +54,32 @@ const CashflowForecast = () => {
 
   // Fonction pour créer les gradients
   useEffect(() => {
-    if (chartRef.current) {
-      const ctx = chartRef.current.ctx;
-      
-      // Gradient pour les entrées
-      const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
-      incomeGradient.addColorStop(0, `${neonColors.green}60`);
-      incomeGradient.addColorStop(1, `${neonColors.green}10`);
-      
-      // Gradient pour les sorties
-      const expensesGradient = ctx.createLinearGradient(0, 0, 0, 400);
-      expensesGradient.addColorStop(0, `${neonColors.pink}60`);
-      expensesGradient.addColorStop(1, `${neonColors.pink}10`);
-      
-      setGradients({
-        income: incomeGradient,
-        expenses: expensesGradient
-      });
+    if (containerRef.current) {
+      const canvas = containerRef.current.querySelector('canvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Gradient pour les entrées
+          const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
+          incomeGradient.addColorStop(0, `${neonColors.green}60`);
+          incomeGradient.addColorStop(1, `${neonColors.green}10`);
+          
+          // Gradient pour les sorties
+          const expensesGradient = ctx.createLinearGradient(0, 0, 0, 400);
+          expensesGradient.addColorStop(0, `${neonColors.pink}60`);
+          expensesGradient.addColorStop(1, `${neonColors.pink}10`);
+          
+          setGradients({
+            income: incomeGradient,
+            expenses: expensesGradient
+          });
+        }
+      }
     }
-  }, [period]);
+  }, [period, activeScenario]);
 
   // Données pour les prévisions
-  const getChartData = () => {
+  const getChartData = (): ChartData<'line'> => {
     const baseData = {
       monthly: {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
@@ -74,7 +88,7 @@ const CashflowForecast = () => {
             label: 'Entrées prévues (k€)',
             data: [120, 150, 180, 200, 170, 220, 210],
             borderColor: neonColors.green,
-            backgroundColor: gradients.income,
+            backgroundColor: gradients.income || `${neonColors.green}60`,
             fill: true,
             tension: 0.4,
             pointRadius: 4,
@@ -87,7 +101,7 @@ const CashflowForecast = () => {
             label: 'Sorties prévues (k€)',
             data: [80, 90, 100, 110, 95, 105, 100],
             borderColor: neonColors.pink,
-            backgroundColor: gradients.expenses,
+            backgroundColor: gradients.expenses || `${neonColors.pink}60`,
             fill: true,
             tension: 0.4,
             pointRadius: 4,
@@ -105,7 +119,7 @@ const CashflowForecast = () => {
             label: 'Entrées prévues (k€)',
             data: [500, 600, 550, 700],
             borderColor: neonColors.green,
-            backgroundColor: gradients.income,
+            backgroundColor: gradients.income || `${neonColors.green}60`,
             fill: true,
             tension: 0.4,
           },
@@ -113,7 +127,7 @@ const CashflowForecast = () => {
             label: 'Sorties prévues (k€)',
             data: [300, 350, 400, 450],
             borderColor: neonColors.pink,
-            backgroundColor: gradients.expenses,
+            backgroundColor: gradients.expenses || `${neonColors.pink}60`,
             fill: true,
             tension: 0.4,
           },
@@ -126,7 +140,7 @@ const CashflowForecast = () => {
             label: 'Entrées prévues (k€)',
             data: [2000, 2500, 3000],
             borderColor: neonColors.green,
-            backgroundColor: gradients.income,
+            backgroundColor: gradients.income || `${neonColors.green}60`,
             fill: true,
             tension: 0.4,
           },
@@ -134,7 +148,7 @@ const CashflowForecast = () => {
             label: 'Sorties prévues (k€)',
             data: [1500, 1800, 2000],
             borderColor: neonColors.pink,
-            backgroundColor: gradients.expenses,
+            backgroundColor: gradients.expenses || `${neonColors.pink}60`,
             fill: true,
             tension: 0.4,
           },
@@ -160,16 +174,17 @@ const CashflowForecast = () => {
 
     const modifier = scenarioModifiers[activeScenario];
     const periodKey = period === 'mois' ? 'monthly' : period === 'trimestre' ? 'quarterly' : 'yearly';
-    const data = JSON.parse(JSON.stringify(baseData[periodKey]));
+    const data = JSON.parse(JSON.stringify(baseData[periodKey])) as ChartData<'line'>;
 
-    data.datasets[0].data = data.datasets[0].data.map(val => Math.round(val * modifier.income));
-    data.datasets[1].data = data.datasets[1].data.map(val => Math.round(val * modifier.expenses));
+    // Appliquer les modificateurs de scénario
+    data.datasets[0].data = data.datasets[0].data.map(val => Math.round(Number(val) * modifier.income));
+    data.datasets[1].data = data.datasets[1].data.map(val => Math.round(Number(val) * modifier.expenses));
 
     return data;
   };
 
   // Options pour le graphique avec style néon
-  const chartOptions = {
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -242,7 +257,7 @@ const CashflowForecast = () => {
             weight: 'bold',
             size: 11
           },
-          callback: (value) => `${value} k€`
+          callback: (value: number | string) => `${value} k€`
         }
       }
     },
@@ -255,8 +270,8 @@ const CashflowForecast = () => {
   // Calcul des indicateurs clés
   const calculateKPIs = () => {
     const data = getChartData();
-    const incomeData = data.datasets[0].data;
-    const expensesData = data.datasets[1].data;
+    const incomeData = data.datasets[0].data as number[];
+    const expensesData = data.datasets[1].data as number[];
     
     const lastIncome = incomeData[incomeData.length - 1];
     const lastExpenses = expensesData[expensesData.length - 1];
@@ -267,10 +282,10 @@ const CashflowForecast = () => {
                    (incomeData[0] - expensesData[0]) * 100;
     
     return {
-      lastIncome: `${lastIncome} k€`,
-      lastExpenses: `${lastExpenses} k€`,
-      netCashflow: `${netCashflow} k€`,
-      cashflowGrowth: growth.toFixed(1)
+      lastIncome,
+      lastExpenses,
+      netCashflow,
+      cashflowGrowth: growth
     };
   };
 
@@ -282,6 +297,22 @@ const CashflowForecast = () => {
     { id: 'realiste', title: 'Scénario Réaliste', color: 'cyan', description: 'Tendances actuelles maintenues' },
     { id: 'pessimiste', title: 'Scénario Pessimiste', color: 'pink', description: 'Ralentissement économique, coûts accrus' }
   ];
+
+  // Fonction pour obtenir les classes de couleur dynamiques
+  const getScenarioClasses = (scenario: typeof scenarios[0]) => {
+    const isActive = activeScenario === scenario.id;
+    const color = scenario.color;
+
+    const borderClasses = isActive 
+      ? `border-${color}-500/50 shadow-[0_0_15px_${neonColors[color as keyof typeof neonColors]}30]`
+      : 'border-gray-700 hover:border-cyan-500/30';
+
+    const bgClasses = isActive
+      ? `from-${color}-900/40 to-${color}-800/30`
+      : 'from-gray-800/30 to-gray-900/20';
+
+    return { borderClasses, bgClasses };
+  };
 
   return (
     <div className="
@@ -317,7 +348,7 @@ const CashflowForecast = () => {
           ">
             <select
               value={period}
-              onChange={(e) => setPeriod(e.target.value)}
+              onChange={(e) => setPeriod(e.target.value as PeriodType)}
               className="
                 bg-transparent
                 text-cyan-400
@@ -370,36 +401,32 @@ const CashflowForecast = () => {
 
       {/* Scénarios de prévision */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {scenarios.map(scenario => (
-          <div 
-            key={scenario.id}
-            onClick={() => setActiveScenario(scenario.id)}
-            className={`
-              p-4 rounded-xl cursor-pointer transition-all
-              border ${
-                activeScenario === scenario.id 
-                  ? `border-${scenario.color}-500/50 shadow-[0_0_15px_${neonColors[scenario.color]}30]`
-                  : `border-gray-700 hover:border-${scenario.color}-500/30`
-              }
-              bg-gradient-to-br ${
-                activeScenario === scenario.id 
-                  ? `from-${scenario.color}-900/40 to-${scenario.color}-800/30`
-                  : 'from-gray-800/30 to-gray-900/20'
-              }
-            `}
-          >
-            <div className={`font-bold text-${scenario.color}-400`}>{scenario.title}</div>
-            <div className="text-sm text-cyan-400/80 mt-1">{scenario.description}</div>
-            <div className="mt-2 flex justify-between items-center">
-              <span className="text-xs text-cyan-400/60">Sélectionné</span>
-              <div className={`w-5 h-5 rounded-full border-2 ${
-                activeScenario === scenario.id 
-                  ? `bg-${scenario.color}-400 border-${scenario.color}-400`
-                  : 'border-cyan-400/30'
-              }`}></div>
+        {scenarios.map(scenario => {
+          const { borderClasses, bgClasses } = getScenarioClasses(scenario);
+          
+          return (
+            <div 
+              key={scenario.id}
+              onClick={() => setActiveScenario(scenario.id as ScenarioType)}
+              className={`
+                p-4 rounded-xl cursor-pointer transition-all
+                border ${borderClasses}
+                bg-gradient-to-br ${bgClasses}
+              `}
+            >
+              <div className={`font-bold text-${scenario.color}-400`}>{scenario.title}</div>
+              <div className="text-sm text-cyan-400/80 mt-1">{scenario.description}</div>
+              <div className="mt-2 flex justify-between items-center">
+                <span className="text-xs text-cyan-400/60">Sélectionné</span>
+                <div className={`w-5 h-5 rounded-full border-2 ${
+                  activeScenario === scenario.id 
+                    ? `bg-${scenario.color}-400 border-${scenario.color}-400`
+                    : 'border-cyan-400/30'
+                }`}></div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* KPI Cards */}
@@ -412,7 +439,7 @@ const CashflowForecast = () => {
         ">
           <div className="text-green-400/80">Entrées finales</div>
           <div className="text-2xl font-bold text-green-300 mt-1">
-            {kpis.lastIncome}
+            {kpis.lastIncome} k€
           </div>
           <div className="text-sm text-green-400/60 mt-2">
             {period === 'mois' ? 'Fin de mois' : period === 'trimestre' ? 'Fin de trimestre' : 'Fin d\'année'}
@@ -427,7 +454,7 @@ const CashflowForecast = () => {
         ">
           <div className="text-pink-400/80">Sorties finales</div>
           <div className="text-2xl font-bold text-pink-300 mt-1">
-            {kpis.lastExpenses}
+            {kpis.lastExpenses} k€
           </div>
           <div className="text-sm text-pink-400/60 mt-2">
             {period === 'mois' ? 'Fin de mois' : period === 'trimestre' ? 'Fin de trimestre' : 'Fin d\'année'}
@@ -442,9 +469,9 @@ const CashflowForecast = () => {
         ">
           <div className="text-cyan-400/80">Trésorerie nette</div>
           <div className={`text-2xl font-bold mt-1 ${
-            parseFloat(kpis.netCashflow) >= 0 ? 'text-green-400' : 'text-red-400'
+            kpis.netCashflow >= 0 ? 'text-green-400' : 'text-red-400'
           }`}>
-            {kpis.netCashflow}
+            {kpis.netCashflow} k€
           </div>
           <div className="text-sm text-cyan-400/60 mt-2">
             Solde projeté
@@ -459,9 +486,9 @@ const CashflowForecast = () => {
         ">
           <div className="text-yellow-400/80">Croissance projetée</div>
           <div className={`text-2xl font-bold mt-1 ${
-            parseFloat(kpis.cashflowGrowth) >= 0 ? 'text-green-400' : 'text-red-400'
+            kpis.cashflowGrowth >= 0 ? 'text-green-400' : 'text-red-400'
           }`}>
-            {kpis.cashflowGrowth}%
+            {kpis.cashflowGrowth.toFixed(1)}%
           </div>
           <div className="text-sm text-yellow-400/60 mt-2">
             Sur la période
@@ -470,9 +497,12 @@ const CashflowForecast = () => {
       </div>
 
       {/* Graphique en ligne */}
-      <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6">
+      <div 
+        className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6"
+        ref={containerRef}
+      >
         <div className="h-96">
-          <Line ref={chartRef} data={getChartData()} options={chartOptions} />
+          <Line data={getChartData()} options={chartOptions} />
         </div>
       </div>
 
@@ -560,7 +590,7 @@ const CashflowForecast = () => {
         </div>
         
         <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
-          <h3 className="text-lg font-bold text-purple-400 mb-4">Plan d'action</h3>
+          <h3 className="text-lg font-bold text-purple-400 mb-4">{"Plan d'action"}</h3>
           <ul className="space-y-3">
             {activeScenario === 'optimiste' && (
               <>
@@ -618,7 +648,7 @@ const CashflowForecast = () => {
                   <div className="w-6 h-6 rounded-full bg-pink-500/10 text-pink-400 flex items-center justify-center mr-3 mt-1">1</div>
                   <div>
                     <div className="font-medium text-cyan-300">Réduction des coûts</div>
-                    <div className="text-sm text-purple-400/80">Identifier 20% d'économies potentielles</div>
+                    <div className="text-sm text-purple-400/80">{"Identifier 20% d'économies potentielles"}</div>
                   </div>
                 </li>
                 <li className="flex items-start">

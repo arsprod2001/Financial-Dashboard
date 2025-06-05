@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken'
 import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from './prisma'
 
-// Vérification de la présence du secret JWT au démarrage
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET est manquant dans les variables d\'environnement')
 }
@@ -20,7 +19,6 @@ export const authenticateUser = async (
   res: NextApiResponse
 ): Promise<{ user: { id: number; email: string } | null; message: string | null }> => {
   
-  // Récupération du token depuis les cookies
   const token = req.cookies.token
   
   if (!token) {
@@ -31,16 +29,13 @@ export const authenticateUser = async (
   }
 
   try {
-    // Vérification et décodage du token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number }
     
-    // Récupération de l'utilisateur
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: { 
         id: true, 
         email: true,
-        // Ajouter d'autres champs nécessaires ici
       }
     })
 
@@ -58,7 +53,6 @@ export const authenticateUser = async (
     }
     
   } catch (error) {
-    // Journalisation détaillée des erreurs
     if (error instanceof jwt.TokenExpiredError) {
       console.warn('Token expiré:', token)
       return { 
@@ -83,7 +77,6 @@ export const authenticateUser = async (
   }
 }
 
-// Middleware de protection pour les routes API
 export const protectAPI = (handler: Function) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const { user, message } = await authenticateUser(req, res)
@@ -92,7 +85,6 @@ export const protectAPI = (handler: Function) => {
       return res.status(401).json({ error: message || 'Non autorisé' })
     }
     
-    // Ajouter l'utilisateur à la requête pour les handlers suivants
     ;(req as any).user = user
     
     return handler(req, res)

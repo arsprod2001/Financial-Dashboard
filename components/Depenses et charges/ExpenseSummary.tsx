@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend,
+  ChartOptions,
+  TooltipItem,
+
 } from 'chart.js';
 import { 
   FiChevronDown, FiChevronUp, FiFilter, FiRefreshCw, 
@@ -18,13 +21,42 @@ ChartJS.register(
   Legend
 );
 
+// Définir les types
+interface ExpenseDetail {
+  id: number;
+  category: string; 
+  amount: string; 
+  percent: string; 
+  trend: string; 
+  trendDirection: string;
+  color: string;
+  manager: string;
+  contact: string;
+  contracts: number;
+}
+
+interface OptimizationItem {
+  action: string;
+  category: string;
+  savings: string;
+  deadline: string;
+  status: string;
+}
+
+interface KpiAction {
+  title: string;
+  icon: JSX.Element;
+  color: string;
+  onClick: () => void;
+}
+
 const ExpenseSummary = () => {
   const [timePeriod, setTimePeriod] = useState('mois');
   const [showDetails, setShowDetails] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('toutes');
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState<ExpenseDetail | null>(null);
   const [optimizationPlanVisible, setOptimizationPlanVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('toutes');
 
   const expenseData = {
     labels: ['Salaires', 'Loyer', 'Fournitures', 'Marketing', 'Services', 'Technologie'],
@@ -53,44 +85,47 @@ const ExpenseSummary = () => {
     ],
   };
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right',
-        labels: {
-          color: '#00f3ff',
-          font: {
-            family: "'Roboto Mono', monospace",
-            size: 12,
-            weight: 'bold'
-          },
-          padding: 20,
-          usePointStyle: true,
-        }
-      },
-      tooltip: {
-        backgroundColor: '#000',
-        titleColor: '#00f3ff',
-        bodyColor: '#fff',
-        borderColor: '#00f3ff',
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        callbacks: {
-          label: (context) => ` ${context.parsed} k$ (${Math.round(context.parsed / 125 * 100)}%)`
-        }
+  const chartOptions: ChartOptions<'pie'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: {
+        color: '#00f3ff',
+        font: {
+          family: "'Roboto Mono', monospace",
+          size: 12,
+          weight: 'bold'
+        },
+        padding: 20,
+        usePointStyle: true,
       }
     },
-    animation: {
-      animateRotate: true,
-      animateScale: true,
-      duration: 1000
+    tooltip: {
+      backgroundColor: '#000',
+      titleColor: '#00f3ff',
+      bodyColor: '#fff',
+      borderColor: '#00f3ff',
+      borderWidth: 1,
+      padding: 12,
+      cornerRadius: 8,
+      callbacks: {
+        label: (context: TooltipItem<'pie'>) => {
+          const value = context.parsed;
+          return ` ${value} k$ (${Math.round(value / 125 * 100)}%)`;
+        }
+      }
     }
-  };
+  },
+  animation: {
+    animateRotate: true,
+    animateScale: true,
+    duration: 1000
+  }
+};
 
-  const expenseDetails = [
+  const expenseDetails: ExpenseDetail[] = [
     { 
       id: 1,
       category: 'Salaires', 
@@ -165,7 +200,7 @@ const ExpenseSummary = () => {
     }
   ];
 
-  const kpiActions = [
+  const kpiActions: KpiAction[] = [
     {
       title: "Créer un nouveau budget",
       icon: <FiPlus />,
@@ -192,7 +227,7 @@ const ExpenseSummary = () => {
     }
   ];
 
-  const optimizationPlan = [
+  const optimizationPlan: OptimizationItem[] = [
     {
       action: "Renégocier les contrats fournisseurs",
       category: "Fournitures",
@@ -227,7 +262,7 @@ const ExpenseSummary = () => {
     item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCategoryAction = (action, categoryId) => {
+  const handleCategoryAction = (action: string, categoryId: number) => {
     const category = expenseDetails.find(item => item.id === categoryId);
     switch(action) {
       case 'edit':
@@ -237,7 +272,7 @@ const ExpenseSummary = () => {
         console.log(`Supprimer la catégorie: ${category?.category}`);
         break;
       case 'analyze':
-        setSelectedCategory(category);
+        if (category) setSelectedCategory(category);
         break;
       case 'contact':
         console.log(`Contacter le responsable: ${category?.manager}`);
@@ -541,7 +576,7 @@ const ExpenseSummary = () => {
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
             <div className="text-cyan-400/80 mb-2">Moyenne du secteur</div>
             <div className="text-xl font-bold text-cyan-300">112 k$</div>
-            <div className="text-sm text-cyan-400/60 mt-1">pour votre taille d'entreprise</div>
+            <div className="text-sm text-cyan-400/60 mt-1">{"pour votre taille d'entreprise"}</div>
             <button 
               className="mt-3 px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/30 hover:bg-cyan-500/20 transition-all text-sm flex items-center"
               onClick={() => console.log("Voir les détails du secteur")}
@@ -580,7 +615,7 @@ const ExpenseSummary = () => {
       {optimizationPlanVisible && (
         <div className="bg-gray-800/40 rounded-xl border border-yellow-500/30 p-6 mb-6 neon-glow-yellow">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-yellow-400">Plan d'optimisation des dépenses</h3>
+            <h3 className="text-lg font-bold text-yellow-400">{"Plan d'optimisation des dépenses"}</h3>
             <button 
               className="text-yellow-400 hover:text-yellow-300"
               onClick={() => setOptimizationPlanVisible(false)}
@@ -682,8 +717,8 @@ const ExpenseSummary = () => {
           ) : (
             <div className="text-center text-pink-400/60">
               <div className="text-2xl mb-2">Analyse détaillée</div>
-              <p>Sélectionnez une catégorie pour voir l'analyse détaillée</p>
-              <p className="mt-2 text-sm">Ou utilisez le bouton "Examiner" dans la liste des catégories</p>
+              <p>{"Sélectionnez une catégorie pour voir l'analyse détaillée"}</p>
+              <p className="mt-2 text-sm">{"Ou utilisez le bouton \"Examiner\" dans la liste des catégories"}</p>
             </div>
           )}
         </div>
@@ -713,5 +748,3 @@ const ExpenseSummary = () => {
 };
 
 export default ExpenseSummary;
-
- 

@@ -9,6 +9,8 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
+  ChartOptions
 } from 'chart.js';
 
 // Enregistrer les composants nécessaires de Chart.js
@@ -26,8 +28,8 @@ const CashflowChart = () => {
   // État pour la période sélectionnée
   const [period, setPeriod] = useState('mois'); // Options : mois, trimestre, année
 
-  // Données pour les entrées et sorties (simulées)
-  const monthlyData = {
+  // Typage des données du graphique
+  const monthlyData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
@@ -47,7 +49,7 @@ const CashflowChart = () => {
     ],
   };
 
-  const quarterlyData = {
+  const quarterlyData: ChartData<'line'> = {
     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
     datasets: [
       {
@@ -67,7 +69,7 @@ const CashflowChart = () => {
     ],
   };
 
-  const yearlyData = {
+  const yearlyData: ChartData<'line'> = {
     labels: ['2021', '2022', '2023'],
     datasets: [
       {
@@ -88,7 +90,7 @@ const CashflowChart = () => {
   };
 
   // Fonction pour sélectionner les données en fonction de la période
-  const getChartData = () => {
+  const getChartData = (): ChartData<'line'> => {
     switch (period) {
       case 'mois':
         return monthlyData;
@@ -101,12 +103,12 @@ const CashflowChart = () => {
     }
   };
 
-  // Options pour le graphique en ligne
-  const chartOptions = {
+  // Options pour le graphique en ligne avec typage strict
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top' as const, // Type assertion for literal value
       },
       title: {
         display: true,

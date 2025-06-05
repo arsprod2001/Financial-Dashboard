@@ -1,7 +1,19 @@
 import React from 'react';
 
+// Définir les types pour les paramètres
+type AnomalyType = 'débit' | 'crédit' | 'solde' | 'frais';
+type SeverityLevel = 'high' | 'medium' | 'low';
+
+interface FinancialAnomaly {
+  id: number;
+  title: string;
+  description: string;
+  type: AnomalyType;
+  severity: SeverityLevel;
+}
+
 const FinancialAnomalies = () => {
-  const anomalies = [
+  const anomalies: FinancialAnomaly[] = [
     {
       id: 1,
       title: 'Débit anormal',
@@ -32,7 +44,7 @@ const FinancialAnomalies = () => {
     },
   ];
 
-  const getTypeStyle = (type) => {
+  const getTypeStyle = (type: AnomalyType) => {
     switch (type) {
       case 'débit':
         return 'bg-gradient-to-r from-red-500/15 to-pink-600/15 border-l-4 border-red-400';
@@ -47,7 +59,7 @@ const FinancialAnomalies = () => {
     }
   };
 
-  const getSeverityStyle = (severity) => {
+  const getSeverityStyle = (severity: SeverityLevel) => {
     switch (severity) {
       case 'high':
         return 'bg-red-400 neon-glow-red';

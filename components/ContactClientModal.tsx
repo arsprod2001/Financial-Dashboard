@@ -1,35 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { FiX, FiMail, FiPhone, FiCalendar, FiPaperclip, FiSend, FiUser, FiMessageSquare } from 'react-icons/fi';
 
-const ContactClientModal = ({ client, onClose }) => {
-  const [formData, setFormData] = useState({
+// Définition des interfaces
+interface ClientContactInfo {
+  id?: number;
+  name?: string;
+  email?: string;
+  phone?: string;
+  lastContact?: string;
+}
+
+interface ContactClientModalProps {
+  client?: ClientContactInfo;
+  onClose: () => void;
+}
+
+type ContactType = 'email' | 'phone' | 'meeting';
+
+interface FormDataState {
+  subject: string;
+  contactType: ContactType;
+  message: string;
+  attachment: File | null;
+}
+
+const ContactClientModal = ({ client, onClose }: ContactClientModalProps) => {
+  const [formData, setFormData] = useState<FormDataState>({
     subject: '',
     contactType: 'email',
     message: '',
     attachment: null
   });
+  
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, attachment: e.target.files[0] }));
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({ ...prev, attachment: e.target.files![0] }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setIsSending(true);
     
-    // Simulation d'envoi
     setTimeout(() => {
       setIsSending(false);
       setIsSuccess(true);
       
-      // Réinitialiser après succès
       setTimeout(() => {
         setIsSuccess(false);
         onClose();
@@ -46,7 +70,6 @@ const ContactClientModal = ({ client, onClose }) => {
         neon-glow
         overflow-hidden
       ">
-        {/* En-tête de la modal */}
         <div className="p-6 border-b border-cyan-500/30 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-cyan-400 flex items-center">
@@ -63,7 +86,6 @@ const ContactClientModal = ({ client, onClose }) => {
           </button>
         </div>
         
-        {/* Corps de la modal */}
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           {isSuccess ? (
             <div className="flex flex-col items-center justify-center py-12">
@@ -76,7 +98,6 @@ const ContactClientModal = ({ client, onClose }) => {
           ) : (
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Informations client */}
                 <div className="bg-gray-800/40 p-4 rounded-lg border border-cyan-500/20">
                   <h3 className="text-lg font-semibold text-cyan-300 mb-3">Informations client</h3>
                   <div className="space-y-3">
@@ -99,7 +120,6 @@ const ContactClientModal = ({ client, onClose }) => {
                   </div>
                 </div>
                 
-                {/* Formulaire de contact */}
                 <div className="space-y-4">
                   <div>
                     <label className="block text-cyan-400 mb-2">Sujet</label>
@@ -207,7 +227,6 @@ const ContactClientModal = ({ client, onClose }) => {
                 </div>
               </div>
               
-              {/* Pied de page */}
               <div className="mt-8 flex justify-end space-x-3">
                 <button
                   type="button"
@@ -241,7 +260,6 @@ const ContactClientModal = ({ client, onClose }) => {
           )}
         </div>
         
-        {/* Effet de lueur */}
         <div className="
           absolute inset-0 rounded-xl 
           bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

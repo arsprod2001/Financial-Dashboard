@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -10,7 +10,10 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ScriptableContext,
+  TooltipItem,
 } from 'chart.js';
+
 
 ChartJS.register(
   CategoryScale,
@@ -33,20 +36,26 @@ const ExpensesChart = () => {
         label: 'Dépenses',
         data: [30, 45, 50, 60, 40, 35, 25],
         borderColor: '#ff206e',
-        backgroundColor: 'transparent',
+        backgroundColor: (ctx: ScriptableContext<'line'>) => {
+          const chart = ctx.chart;
+          const { ctx: context, chartArea } = chart;
+          if (!chartArea) return 'transparent';
+
+          const gradient = context.createLinearGradient(
+            0,
+            chartArea.top,
+            0,
+            chartArea.bottom
+          );
+          gradient.addColorStop(0, 'rgba(255, 32, 110, 0.1)');
+          gradient.addColorStop(1, 'rgba(255, 32, 110, 0)');
+          return gradient;
+        },
         borderWidth: 2,
         tension: 0.4,
         pointRadius: 4,
         pointHoverRadius: 8,
-        fill: {
-          target: 'origin',
-          above: (ctx) => {
-            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-            gradient.addColorStop(0, 'rgba(255, 32, 110, 0.1)');
-            gradient.addColorStop(1, 'rgba(255, 32, 110, 0)');
-            return gradient;
-          }
-        },
+        fill: 'origin' as const,  // Use string literal instead of object
       },
     ],
   };
@@ -69,7 +78,7 @@ const ExpensesChart = () => {
         font: {
           family: 'monospace',
           size: 16,
-          weight: 'bold'
+          weight: 'bold' as const,
         }
       },
       tooltip: {
@@ -80,13 +89,13 @@ const ExpensesChart = () => {
         borderWidth: 1,
         padding: 12,
         callbacks: {
-          label: (ctx) => ` $${ctx.parsed.y}K`
+          label: (ctx: TooltipItem<'line'>) => ` $${ctx.parsed.y}K`
         }
       }
     },
     scales: {
       x: {
-        grid: { 
+        grid: {
           color: 'rgba(255, 32, 110, 0.1)',
           drawTicks: false
         },
@@ -97,24 +106,20 @@ const ExpensesChart = () => {
       },
       y: {
         beginAtZero: true,
-        grid: { 
+        grid: {
           color: 'rgba(255, 32, 110, 0.1)',
           drawTicks: false
         },
         ticks: {
           color: '#ff206e',
-          callback: (value) => `$${value}K`,
+          callback: (value: number | string) => `$${value}K`,
           font: { family: 'monospace' }
         }
       }
     },
     animation: {
-      tension: {
-        duration: 1000,
-        easing: 'easeOutQuint',
-        from: 0.6,
-        to: 0.4
-      }
+      duration: 1000,
+      easing: 'easeOutQuint' as const,
     }
   };
 
@@ -127,9 +132,9 @@ const ExpensesChart = () => {
       transition-all duration-500
     ">
       <div className="h-72 w-full relative">
-        <Line 
+        <Line
           ref={chartRef}
-          data={data} 
+          data={data}
           options={options}
         />
         <div className="

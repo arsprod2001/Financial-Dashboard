@@ -9,7 +9,10 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  Chart,
+  ChartOptions,
+  TooltipItem,
 } from 'chart.js';
 import { FiCalendar, FiTrendingUp, FiTrendingDown, FiRefreshCw, FiDownload, FiChevronDown } from 'react-icons/fi';
 
@@ -24,22 +27,38 @@ ChartJS.register(
   Filler
 );
 
-const ExpenseEvolution = () => {
-  const [period, setPeriod] = useState('mois');
-  const [showOptions, setShowOptions] = useState(false);
-  const chartRef = useRef(null);
-  const [gradient, setGradient] = useState(null);
-  
-  const neonColors = {
-    cyan: '#00f3ff',
-    pink: '#ff206e',
-    purple: '#bc00ff',
-    yellow: '#ffd700',
-    red: '#ff206e'
-  };
+// Définir les types
+type PeriodKey = 'jour' | 'semaine' | 'mois' | 'trimestre';
 
-  const getChartData = () => {
-    const baseData = {
+interface ChartDataItem {
+  labels: string[];
+  data: number[];
+  growth: number;
+}
+
+interface ChartData {
+  jour: ChartDataItem;
+  semaine: ChartDataItem;
+  mois: ChartDataItem;
+  trimestre: ChartDataItem;
+}
+
+const neonColors = {
+  cyan: '#00f3ff',
+  pink: '#ff206e',
+  purple: '#bc00ff',
+  yellow: '#ffd700',
+  red: '#ff206e'
+};
+
+const ExpenseEvolution = () => {
+  const [period, setPeriod] = useState<PeriodKey>('mois');
+  const [showOptions, setShowOptions] = useState(false);
+  const chartRef = useRef<Chart<'line', number[], string> | null>(null);
+const [gradient, setGradient] = useState<CanvasGradient | null>(null);
+  
+  const getChartData = (): ChartDataItem => {
+    const baseData: ChartData = {
       jour: {
         labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
         data: [42, 48, 35, 52, 47, 39, 45],
@@ -72,13 +91,21 @@ const ExpenseEvolution = () => {
 
   useEffect(() => {
     if (chartRef.current) {
-      const ctx = chartRef.current.ctx;
-      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      const chart = chartRef.current;
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
+      
+      if (!chartArea) return;
+      
+      const gradient = ctx.createLinearGradient(
+        0, chartArea.top, 
+        0, chartArea.bottom
+      );
       gradient.addColorStop(0, `${neonColors.pink}40`);
       gradient.addColorStop(1, `${neonColors.pink}00`);
       setGradient(gradient);
     }
-  }, [period]);
+  }, [period, neonColors.pink]);
 
   const chartConfig = {
     labels: chartData.labels,
@@ -87,7 +114,7 @@ const ExpenseEvolution = () => {
         label: 'Dépenses (k€)',
         data: chartData.data,
         borderColor: neonColors.pink,
-        backgroundColor: gradient,
+        backgroundColor: gradient || 'transparent',
         borderWidth: 3,
         pointRadius: 5,
         pointHoverRadius: 8,
@@ -100,88 +127,88 @@ const ExpenseEvolution = () => {
     ]
   };
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            size: 12,
-            weight: 'bold'
-          },
-          padding: 20,
-          usePointStyle: true,
-        }
-      },
-      title: {
-        display: true,
+ const chartOptions: ChartOptions<'line'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: {
         color: neonColors.cyan,
-        text: `ÉVOLUTION DES DÉPENSES (${period.toUpperCase()})`,
         font: {
-          family: "'Orbitron', sans-serif",
-          size: 18,
+          family: "'Roboto Mono', monospace",
+          size: 12,
           weight: 'bold'
         },
-        padding: {
-          top: 10,
-          bottom: 20
-        }
-      },
-      tooltip: {
-        backgroundColor: '#000',
-        titleColor: neonColors.cyan,
-        bodyColor: '#fff',
-        borderColor: neonColors.cyan,
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: true,
+        padding: 20,
         usePointStyle: true,
-        callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y} k€`
-        }
       }
     },
-    scales: {
-      x: {
-        grid: {
-          color: `${neonColors.cyan}10`,
-          drawTicks: false
-        },
-        ticks: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            weight: 'bold',
-            size: 11
-          }
-        }
+    title: {
+      display: true,
+      color: neonColors.cyan,
+      text: `ÉVOLUTION DES DÉPENSES (${period.toUpperCase()})`,
+      font: {
+        family: "'Orbitron', sans-serif",
+        size: 18,
+        weight: 'bold'
       },
-      y: {
-        grid: {
-          color: `${neonColors.cyan}10`,
-          drawTicks: false
-        },
-        ticks: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            weight: 'bold',
-            size: 11
-          },
-          callback: (value) => `${value}k`
+      padding: {
+        top: 10,
+        bottom: 20
+      }
+    },
+    tooltip: {
+      backgroundColor: '#000',
+      titleColor: neonColors.cyan,
+      bodyColor: '#fff',
+      borderColor: neonColors.cyan,
+      borderWidth: 1,
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      usePointStyle: true,
+      callbacks: {
+        label: (ctx: TooltipItem<'line'>) => ` ${ctx.parsed.y} k€`
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: {
+        color: `${neonColors.cyan}10`,
+        drawTicks: false
+      },
+      ticks: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          weight: 'bold',
+          size: 11
         }
       }
     },
-    animation: {
-      duration: 800,
-      easing: 'easeOutQuart'
+    y: {
+      grid: {
+        color: `${neonColors.cyan}10`,
+        drawTicks: false
+      },
+      ticks: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          weight: 'bold',
+          size: 11
+        },
+        callback: (value: string | number) => `${value}k`
+      }
     }
-  };
+  },
+  animation: {
+    duration: 800,
+    easing: 'easeOutQuart'
+  }
+};
 
   return (
     <div className="
@@ -232,7 +259,7 @@ const ExpenseEvolution = () => {
                 bg-gray-800 border border-cyan-500/30
                 rounded-lg shadow-lg z-10
               ">
-                {['jour', 'semaine', 'mois', 'trimestre'].map(option => (
+                {(['jour', 'semaine', 'mois', 'trimestre'] as PeriodKey[]).map(option => (
                   <button
                     key={option}
                     onClick={() => {
@@ -341,14 +368,22 @@ const ExpenseEvolution = () => {
       {/* Graphique principal */}
       <div className="mb-6 bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
         <div className="h-96">
-          <Line ref={chartRef} data={chartConfig} options={chartOptions} />
+          <Line 
+            ref={(ref) => {
+              if (ref) {
+                chartRef.current = ref;
+              }
+            }} 
+            data={chartConfig} 
+            options={chartOptions} 
+          />
         </div>
       </div>
 
       {/* Analyse comparative */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
-          <h3 className="text-lg font-bold text-purple-400 mb-4">Comparaison avec l'année précédente</h3>
+          <h3 className="text-lg font-bold text-purple-400 mb-4">{"Comparaison avec l'année précédente"}</h3>
           <div className="space-y-4">
             {chartData.labels.map((label, index) => {
               const current = chartData.data[index];
@@ -397,7 +432,7 @@ const ExpenseEvolution = () => {
                 Optimiser les dépenses opérationnelles et réduire les coûts indirects
               </div>
               <button className="mt-3 px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 rounded-lg border border-yellow-500/30 hover:from-yellow-500/30 hover:to-amber-500/30 transition-all">
-                Voir le plan d'optimisation
+                {"Voir le plan d'optimisation"}
               </button>
             </div>
           </div>

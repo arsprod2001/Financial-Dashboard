@@ -10,6 +10,10 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartTypeRegistry,
+  TooltipItem,
+  Chart,
+
 } from 'chart.js';
 import { FiChevronDown, FiChevronUp, FiRefreshCw, FiDownload, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
 
@@ -25,11 +29,28 @@ ChartJS.register(
   Filler
 );
 
+// Définition des types
+interface Account {
+  id: number;
+  name: string;
+  balance: string;
+  trend: string;
+  trendDirection: 'up' | 'down';
+  currency: string;
+  lastTransaction: string;
+}
+{/** 
+interface Projection {
+  period: string;
+  amount: string;
+  trend: string;
+}*/}
+
 const BankBalanceOverview = () => {
-  const [timePeriod, setTimePeriod] = useState('mois');
-  const [showDetails, setShowDetails] = useState(false);
-  const chartRef = useRef(null);
-  const [lineGradient, setLineGradient] = useState(null);
+  const [timePeriod, setTimePeriod] = useState<string>('mois');
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const chartRef = useRef<Chart<'line'> | null>(null);
+  const [lineGradient, setLineGradient] = useState<CanvasGradient | null>(null);
 
   // Couleurs néon
   const neonColors = {
@@ -41,7 +62,7 @@ const BankBalanceOverview = () => {
   };
 
   // Données pour les soldes des comptes bancaires
-  const accounts = [
+  const accounts: Account[] = [
     {
       id: 1,
       name: 'Compte courant',
@@ -96,7 +117,7 @@ const BankBalanceOverview = () => {
             ? [75, 85, 95, 105] 
             : [70, 80, 90, 100, 105, 110],
         borderColor: neonColors.cyan,
-        backgroundColor: lineGradient,
+        backgroundColor: lineGradient as CanvasGradient | undefined,
         borderWidth: 3,
         pointRadius: 5,
         pointHoverRadius: 8,
@@ -150,13 +171,13 @@ const BankBalanceOverview = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top' as const,
         labels: {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
             size: 12,
-            weight: 'bold'
+            weight: 'bold' as const
           },
           padding: 20,
           usePointStyle: true,
@@ -169,7 +190,7 @@ const BankBalanceOverview = () => {
         font: {
           family: "'Orbitron', sans-serif",
           size: 18,
-          weight: 'bold'
+          weight: 'bold' as const
         },
         padding: {
           top: 10,
@@ -187,7 +208,7 @@ const BankBalanceOverview = () => {
         displayColors: true,
         usePointStyle: true,
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y} k€`
+          label: (ctx: TooltipItem<keyof ChartTypeRegistry>) => ` ${ctx.parsed.y} k€`
         }
       }
     },
@@ -201,7 +222,7 @@ const BankBalanceOverview = () => {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 11
           }
         }
@@ -215,22 +236,27 @@ const BankBalanceOverview = () => {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 11
           },
-          callback: (value) => `${value} k€`
+          callback: (value: string | number) => `${value} k€`
         }
       }
     },
     animation: {
       duration: 800,
-      easing: 'easeOutQuart'
+      easing: 'easeOutQuart' as const
     }
   };
 
   // Calcul du solde total
   const totalBalance = accounts.reduce((sum, account) => {
-    const balanceValue = parseFloat(account.balance.replace(' ', '').replace(',', '.').replace('€', ''));
+    const balanceValue = parseFloat(
+      account.balance
+        .replace(/\s/g, '')
+        .replace(',', '.')
+        .replace('€', '')
+    );
     return sum + balanceValue;
   }, 0);
 
@@ -487,7 +513,7 @@ const BankBalanceOverview = () => {
             
             <div className="p-3 bg-cyan-500/10 rounded-lg border border-cyan-500/30 flex items-start">
               <div className="flex-1">
-                <div className="font-medium text-cyan-300">Opportunité d'investissement</div>
+                <div className="font-medium text-cyan-300">{"Opportunité d'investissement"}</div>
                 <div className="text-sm text-cyan-400/80">Excédent disponible détecté</div>
               </div>
               <div className="text-2xl font-bold text-cyan-400">↑</div>
@@ -501,7 +527,7 @@ const BankBalanceOverview = () => {
         <h3 className="text-lg font-bold text-cyan-400 mb-4">Analyse des flux financiers</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
-            <div className="text-cyan-400/80 mb-2">Principale source d'entrées</div>
+            <div className="text-cyan-400/80 mb-2">{"Principale source d'entrées"}</div>
             <div className="text-xl font-bold text-cyan-300">Ventes produits</div>
             <div className="text-2xl font-bold text-green-400 mt-1">42%</div>
           </div>

@@ -11,10 +11,14 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartEvent,
+  ActiveElement,
+  Chart,
+  ChartType,
+  TooltipItem,
 } from 'chart.js';
 import { 
-  FiTrendingUp, FiDollarSign, FiRefreshCw, FiCalendar, 
-  FiFilter, FiDownload, FiZoomIn, FiBarChart2,
+  FiTrendingUp, FiDollarSign, FiRefreshCw, FiCalendar, FiDownload, FiZoomIn, FiBarChart2,
   FiPlus, FiMinus, FiAlertCircle, FiShoppingCart
 } from 'react-icons/fi';
 
@@ -30,16 +34,61 @@ ChartJS.register(
   Filler
 );
 
-const SalesStatistics = () => {
-  const [period, setPeriod] = useState('mois');
-  const [activeChart, setActiveChart] = useState('both');
-  const [selectedPoint, setSelectedPoint] = useState(null);
-  const [comparisonMode, setComparisonMode] = useState(false);
-  const [alerts, setAlerts] = useState([]);
-  const lineChartRef = useRef(null);
-  const [lineGradient, setLineGradient] = useState(null);
-  const [barGradient, setBarGradient] = useState(null);
+// Définition des types
+interface Alert {
+  id: number;
+  message: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+}
 
+interface SelectedPoint {
+  type: 'conversion' | 'sales';
+  period: string;
+  value: number;
+}
+
+type PeriodType = 'mois' | 'trimestre' | 'année';
+type ActiveChartType = 'both' | 'conversion' | 'sales';
+
+interface Dataset {
+  label: string;
+  data: number[];
+  backgroundColor?: string | CanvasGradient;
+  borderColor: string;
+  borderWidth: number;
+  tension?: number;
+  pointRadius?: number;
+  pointHoverRadius?: number;
+  pointBackgroundColor?: string;
+  pointBorderColor?: string;
+  pointBorderWidth?: number;
+  fill?: boolean;
+  hoverBackgroundColor?: string;
+  borderRadius?: number;
+  barPercentage?: number;
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: Dataset[];
+}
+
+interface KPI {
+  totalSales: string;
+  avgConversion: string;
+  peakPerformance: string;
+  salesGrowth: number;
+}
+
+const SalesStatistics = () => {
+   const [period, setPeriod] = useState<PeriodType>('mois');
+  const [activeChart, setActiveChart] = useState<ActiveChartType>('both');
+  const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null);
+  const [comparisonMode, setComparisonMode] = useState<boolean>(false);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const lineChartRef = useRef<Chart<ChartType, number[], string> | null>(null);
+  const [lineGradient, setLineGradient] = useState<CanvasGradient | null>(null);
+  const [barGradient, setBarGradient] = useState<CanvasGradient | null>(null);
   // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
@@ -50,13 +99,13 @@ const SalesStatistics = () => {
   };
 
   // Configuration des données
-  const conversionRateData = {
+  const conversionRateData: ChartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [{
       label: 'Taux de conversion (%)',
       data: [15, 18, 20, 22, 19, 25, 23],
       borderColor: neonColors.cyan,
-      backgroundColor: lineGradient,
+      backgroundColor: lineGradient as CanvasGradient,
       borderWidth: 3,
       tension: 0.4,
       pointRadius: 5,
@@ -68,7 +117,7 @@ const SalesStatistics = () => {
     }],
   };
 
-  const salesData = {
+  const salesData: ChartData = {
     labels: period === 'mois'
       ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
       : period === 'trimestre'
@@ -81,7 +130,7 @@ const SalesStatistics = () => {
         : period === 'trimestre'
           ? [500, 600, 550, 700]
           : [2000, 2500, 3000],
-      backgroundColor: barGradient,
+      backgroundColor: barGradient as CanvasGradient,
       borderColor: neonColors.purple,
       borderWidth: 2,
       hoverBackgroundColor: neonColors.purple,
@@ -109,7 +158,7 @@ const SalesStatistics = () => {
 
   // Création des gradients
   useEffect(() => {
-    if (lineChartRef.current) {
+    if (lineChartRef.current && lineChartRef.current.ctx) {
       const ctx = lineChartRef.current.ctx;
       const gradient = ctx.createLinearGradient(0, 0, 0, 400);
       gradient.addColorStop(0, `${neonColors.cyan}40`);
@@ -124,7 +173,7 @@ const SalesStatistics = () => {
   }, [period]);
 
   // Calcul des indicateurs
-  const calculateKPIs = () => {
+  const calculateKPIs = (): KPI => {
     const conversionData = conversionRateData.datasets[0].data;
     const sales = salesData.datasets[0].data;
     
@@ -136,7 +185,7 @@ const SalesStatistics = () => {
     const lastPeriodSales = sales[sales.length - 1];
     const previousPeriodSales = sales[sales.length - 2];
     const salesGrowth = previousPeriodSales 
-      ? ((lastPeriodSales - previousPeriodSales) / previousPeriodSales * 100).toFixed(1) 
+      ? parseFloat(((lastPeriodSales - previousPeriodSales) / previousPeriodSales * 100).toFixed(1))
       : 0;
     
     return {
@@ -154,17 +203,17 @@ const SalesStatistics = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top' as const,
         labels: {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 12
           },
           padding: 20,
           usePointStyle: true,
-          pointStyle: 'circle'
+          pointStyle: 'circle' as const
         }
       },
       title: {
@@ -173,7 +222,7 @@ const SalesStatistics = () => {
         font: {
           family: "'Orbitron', sans-serif",
           size: 18,
-          weight: 'bold'
+          weight: 'bold' as const
         },
         padding: {
           top: 10,
@@ -191,7 +240,7 @@ const SalesStatistics = () => {
         displayColors: true,
         usePointStyle: true,
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y || ctx.raw} ${ctx.dataset.label.includes('conversion') ? '%' : 'k€'}`
+          label: (ctx: TooltipItem<ChartType>) => ` ${ctx.parsed.y || ctx.raw} ${ctx.dataset.label?.includes('conversion') ? '%' : 'k€'}`,
         }
       }
     },
@@ -205,7 +254,7 @@ const SalesStatistics = () => {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 11
           }
         }
@@ -219,18 +268,18 @@ const SalesStatistics = () => {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 11
           },
-          callback: (value) => `${value}${salesData.datasets[0].label.includes('conversion') ? '%' : 'k'}`
+          callback: (value: string | number) => `${value}${salesData.datasets[0].label.includes('conversion') ? '%' : 'k'}`
         }
       }
     },
     animation: {
       duration: 800,
-      easing: 'easeOutQuart'
+      easing: 'easeOutQuart' as const
     },
-    onClick: (_, elements) => {
+    onClick: (_: ChartEvent, elements: ActiveElement[]) => {
       if (elements.length > 0) {
         const element = elements[0];
         const datasetIndex = element.datasetIndex;
@@ -254,27 +303,29 @@ const SalesStatistics = () => {
   };
 
   // Actions
-  const exportData = (format) => {
+  const exportData = (format: string) => {
     console.log(`Exporting data in ${format} format`);
     // Logique d'exportation réelle irait ici
   };
 
-  const addAlert = (message, type) => {
-    setAlerts([...alerts, { id: Date.now(), message, type }]);
+  const addAlert = (message: string, type: 'success' | 'warning' | 'error' | 'info') => {
+    const newAlert = { id: Date.now(), message, type };
+    setAlerts([...alerts, newAlert]);
     
     // Supprimer l'alerte après 5 secondes
     setTimeout(() => {
-      setAlerts(alerts.filter(alert => alert.id !== Date.now()));
+      setAlerts(alerts.filter(alert => alert.id !== newAlert.id));
     }, 5000);
   };
 
-  const analyzePerformance = () => {
-    const maxConversion = Math.max(...conversionRateData.datasets[0].data);
-    const minConversion = Math.min(...conversionRateData.datasets[0].data);
+  const analyzePerformance = (): string => {
+    const conversionData = conversionRateData.datasets[0].data;
+    const maxConversion = Math.max(...conversionData);
+    const minConversion = Math.min(...conversionData);
     
     return `Votre taux de conversion varie entre ${minConversion}% et ${maxConversion}%. 
             Les meilleures performances sont observées en ${conversionRateData.labels[
-              conversionRateData.datasets[0].data.indexOf(maxConversion)
+              conversionData.indexOf(maxConversion)
             ]}.`;
   };
 
@@ -485,7 +536,7 @@ const SalesStatistics = () => {
           <FiCalendar className="ml-3 text-cyan-400" />
           <select
             value={period}
-            onChange={(e) => setPeriod(e.target.value)}
+            onChange={(e) => setPeriod(e.target.value as PeriodType)}
             className="
               bg-transparent
               text-cyan-400
@@ -496,7 +547,7 @@ const SalesStatistics = () => {
               appearance-none
             "
           >
-            {['mois', 'trimestre', 'année'].map(option => (
+            {(['mois', 'trimestre', 'année'] as PeriodType[]).map(option => (
               <option
                 key={option}
                 value={option}
@@ -509,7 +560,7 @@ const SalesStatistics = () => {
         </div>
         
         <div className="flex space-x-1">
-          {['both', 'conversion', 'sales'].map((type) => (
+          {(['both', 'conversion', 'sales'] as ActiveChartType[]).map((type) => (
             <button
               key={type}
               onClick={() => setActiveChart(type)}

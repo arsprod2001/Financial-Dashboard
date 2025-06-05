@@ -9,9 +9,12 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  Chart,
+  TooltipItem,
+  ChartOptions
 } from 'chart.js';
-import { FiTrendingUp, FiDollarSign, FiPieChart, FiBarChart, FiRefreshCw, FiDownload } from 'react-icons/fi';
+import { FiTrendingUp, FiPieChart, FiBarChart, FiRefreshCw, FiDownload } from 'react-icons/fi';
 
 ChartJS.register(
   ArcElement,
@@ -24,23 +27,41 @@ ChartJS.register(
   Filler
 );
 
-const CostAnalysis = () => {
-  const [timePeriod, setTimePeriod] = useState('année');
-  const pieChartRef = useRef(null);
-  const barChartRef = useRef(null);
-  const [pieGradient, setPieGradient] = useState(null);
-  const [barGradientFixed, setBarGradientFixed] = useState(null);
-  const [barGradientVariable, setBarGradientVariable] = useState(null);
-  
-  const neonColors = {
-    cyan: '#00f3ff',
-    purple: '#bc00ff',
-    pink: '#ff206e',
-    yellow: '#ffd700',
-    green: '#39ff14'
-  };
+// Définition des types
+type TimePeriodKey = 'année' | 'trimestre' | 'mois';
 
-  const costData = {
+interface CostDataItem {
+  fixed: number;
+  variable: number;
+  monthlyFixed: number[];
+  monthlyVariable: number[];
+}
+
+interface CostData {
+  année: CostDataItem;
+  trimestre: CostDataItem;
+  mois: CostDataItem;
+}
+
+const neonColors = {
+  cyan: '#00f3ff',
+  purple: '#bc00ff',
+  pink: '#ff206e',
+  yellow: '#ffd700',
+  green: '#39ff14'
+};
+
+const CostAnalysis = () => {
+  const [timePeriod, setTimePeriod] = useState<TimePeriodKey>('année');
+  const pieChartRef = useRef<Chart<'pie', number[], string> | null>(null);
+  const barChartRef = useRef<Chart<'bar', number[], string> | null>(null);
+  
+  // Références pour les gradients
+  const pieGradientRef = useRef<[CanvasGradient, CanvasGradient] | null>(null);
+  const barGradientFixedRef = useRef<CanvasGradient | null>(null);
+  const barGradientVariableRef = useRef<CanvasGradient | null>(null);
+
+  const costData: CostData = {
     année: {
       fixed: 60000,
       variable: 40000,
@@ -68,34 +89,53 @@ const CostAnalysis = () => {
 
   useEffect(() => {
     if (pieChartRef.current) {
-      const ctx = pieChartRef.current.ctx;
+      const chart = pieChartRef.current;
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
       
-      const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
+      const gradient1 = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
       gradient1.addColorStop(0, `${neonColors.cyan}80`);
       gradient1.addColorStop(1, `${neonColors.cyan}20`);
       
-      const gradient2 = ctx.createLinearGradient(0, 0, 0, 400);
+      const gradient2 = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
       gradient2.addColorStop(0, `${neonColors.purple}80`);
       gradient2.addColorStop(1, `${neonColors.purple}20`);
       
-      setPieGradient([gradient1, gradient2]);
+      pieGradientRef.current = [gradient1, gradient2];
+      chart.update();
     }
 
     if (barChartRef.current) {
-      const ctx = barChartRef.current.ctx;
+      const chart = barChartRef.current;
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
       
-      const gradientFixed = ctx.createLinearGradient(0, 0, 0, 400);
+      const gradientFixed = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
       gradientFixed.addColorStop(0, `${neonColors.cyan}80`);
       gradientFixed.addColorStop(1, `${neonColors.cyan}20`);
       
-      const gradientVariable = ctx.createLinearGradient(0, 0, 0, 400);
+      const gradientVariable = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
       gradientVariable.addColorStop(0, `${neonColors.purple}80`);
       gradientVariable.addColorStop(1, `${neonColors.purple}20`);
       
-      setBarGradientFixed(gradientFixed);
-      setBarGradientVariable(gradientVariable);
+      barGradientFixedRef.current = gradientFixed;
+      barGradientVariableRef.current = gradientVariable;
+      chart.update();
     }
   }, [timePeriod]);
+
+  // Fonctions pour récupérer les gradients
+  const getPieGradients = () => {
+    return pieGradientRef.current || [neonColors.cyan, neonColors.purple];
+  };
+
+  const getBarGradientFixed = () => {
+    return barGradientFixedRef.current || neonColors.cyan;
+  };
+
+  const getBarGradientVariable = () => {
+    return barGradientVariableRef.current || neonColors.purple;
+  };
 
   const costDistributionData = {
     labels: ['Coûts fixes', 'Coûts variables'],
@@ -103,7 +143,7 @@ const CostAnalysis = () => {
       {
         label: 'Répartition des coûts',
         data: [currentData.fixed, currentData.variable],
-        backgroundColor: pieGradient || [neonColors.cyan, neonColors.purple],
+        backgroundColor: getPieGradients(),
         borderColor: [neonColors.cyan, neonColors.purple],
         borderWidth: 2,
       },
@@ -120,7 +160,7 @@ const CostAnalysis = () => {
       {
         label: 'Coûts fixes',
         data: currentData.monthlyFixed,
-        backgroundColor: barGradientFixed || neonColors.cyan,
+        backgroundColor: getBarGradientFixed(),
         borderColor: neonColors.cyan,
         borderWidth: 2,
         borderRadius: 4,
@@ -128,7 +168,7 @@ const CostAnalysis = () => {
       {
         label: 'Coûts variables',
         data: currentData.monthlyVariable,
-        backgroundColor: barGradientVariable || neonColors.purple,
+        backgroundColor: getBarGradientVariable(),
         borderColor: neonColors.purple,
         borderWidth: 2,
         borderRadius: 4,
@@ -136,141 +176,146 @@ const CostAnalysis = () => {
     ],
   };
 
-  const pieChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right',
-        labels: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            size: 12,
-            weight: 'bold'
-          },
-          padding: 20,
-          usePointStyle: true,
-        }
-      },
-      title: {
-        display: true,
+  const pieChartOptions: ChartOptions<'pie'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: {
         color: neonColors.cyan,
-        text: `RÉPARTITION DES COÛTS (${timePeriod.toUpperCase()})`,
         font: {
-          family: "'Orbitron', sans-serif",
-          size: 18,
+          family: "'Roboto Mono', monospace",
+          size: 12,
           weight: 'bold'
         },
-        padding: {
-          top: 10,
-          bottom: 20
-        }
-      },
-      tooltip: {
-        backgroundColor: '#000',
-        titleColor: neonColors.cyan,
-        bodyColor: '#fff',
-        borderColor: neonColors.cyan,
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: true,
+        padding: 20,
         usePointStyle: true,
-        callbacks: {
-          label: (ctx) => ` ${ctx.parsed} € (${ctx.parsed === currentData.fixed ? fixedPercentage : variablePercentage}%)`
-        }
       }
     },
-    animation: {
-      animateRotate: true,
-      animateScale: true,
-      duration: 1000
+    title: {
+      display: true,
+      color: neonColors.cyan,
+      text: `RÉPARTITION DES COÛTS (${timePeriod.toUpperCase()})`,
+      font: {
+        family: "'Orbitron', sans-serif",
+        size: 18,
+        weight: 'bold'
+      },
+      padding: {
+        top: 10,
+        bottom: 20
+      }
+    },
+    tooltip: {
+      backgroundColor: '#000',
+      titleColor: neonColors.cyan,
+      bodyColor: '#fff',
+      borderColor: neonColors.cyan,
+      borderWidth: 1,
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      usePointStyle: true,
+      callbacks: {
+        label: (ctx: TooltipItem<'pie'>) => {
+          const value = ctx.parsed;
+          const percentage = ctx.dataIndex === 0 ? fixedPercentage : variablePercentage;
+          return ` ${value} € (${percentage}%)`;
+        }
+      }
     }
-  };
+  },
+  animation: {
+    animateRotate: true,
+    animateScale: true,
+    duration: 1000
+  }
+};
 
-  const barChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            size: 12,
-            weight: 'bold'
-          },
-          padding: 20,
-          usePointStyle: true,
-        }
-      },
-      title: {
-        display: true,
+// For bar chart
+const barChartOptions: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: {
         color: neonColors.cyan,
-        text: `IMPACT DES COÛTS (${timePeriod.toUpperCase()})`,
         font: {
-          family: "'Orbitron', sans-serif",
-          size: 18,
+          family: "'Roboto Mono', monospace",
+          size: 12,
           weight: 'bold'
         },
-        padding: {
-          top: 10,
-          bottom: 20
-        }
-      },
-      tooltip: {
-        backgroundColor: '#000',
-        titleColor: neonColors.cyan,
-        bodyColor: '#fff',
-        borderColor: neonColors.cyan,
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: true,
+        padding: 20,
         usePointStyle: true,
-        callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y} €`
-        }
       }
     },
-    scales: {
-      x: {
-        grid: {
-          color: `${neonColors.cyan}10`,
-          drawTicks: false
-        },
-        ticks: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            weight: 'bold',
-            size: 11
-          }
-        }
+    title: {
+      display: true,
+      color: neonColors.cyan,
+      text: `IMPACT DES COÛTS (${timePeriod.toUpperCase()})`,
+      font: {
+        family: "'Orbitron', sans-serif",
+        size: 18,
+        weight: 'bold'
       },
-      y: {
-        grid: {
-          color: `${neonColors.cyan}10`,
-          drawTicks: false
-        },
-        ticks: {
-          color: neonColors.cyan,
-          font: {
-            family: "'Roboto Mono', monospace",
-            weight: 'bold',
-            size: 11
-          },
-          callback: (value) => `${value} €`
+      padding: {
+        top: 10,
+        bottom: 20
+      }
+    },
+    tooltip: {
+      backgroundColor: '#000',
+      titleColor: neonColors.cyan,
+      bodyColor: '#fff',
+      borderColor: neonColors.cyan,
+      borderWidth: 1,
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      usePointStyle: true,
+      callbacks: {
+        label: (ctx: TooltipItem<'bar'>) => ` ${ctx.parsed.y} €`
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: {
+        color: `${neonColors.cyan}10`,
+        drawTicks: false
+      },
+      ticks: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          weight: 'bold',
+          size: 11
         }
       }
     },
-    animation: {
-      duration: 800,
-      easing: 'easeOutQuart'
+    y: {
+      grid: {
+        color: `${neonColors.cyan}10`,
+        drawTicks: false
+      },
+      ticks: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          weight: 'bold',
+          size: 11
+        },
+        callback: (value: string | number) => `${value} €`
+      }
     }
-  };
+  },
+  animation: {
+    duration: 800,
+    easing: 'easeOutQuart'
+  }
+};
 
   return (
     <div className="
@@ -307,7 +352,7 @@ const CostAnalysis = () => {
           ">
             <select
               value={timePeriod}
-              onChange={(e) => setTimePeriod(e.target.value)}
+              onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
               className="
                 bg-transparent
                 text-cyan-400
@@ -318,7 +363,7 @@ const CostAnalysis = () => {
                 appearance-none
               "
             >
-              {['mois', 'trimestre', 'année'].map(option => (
+              {(['mois', 'trimestre', 'année'] as TimePeriodKey[]).map(option => (
                 <option
                   key={option}
                   value={option}
@@ -414,13 +459,29 @@ const CostAnalysis = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
           <div className="h-96">
-            <Pie ref={pieChartRef} data={costDistributionData} options={pieChartOptions} />
+            <Pie 
+              ref={(ref) => {
+                if (ref) {
+                  pieChartRef.current = ref;
+                }
+              }} 
+              data={costDistributionData} 
+              options={pieChartOptions} 
+            />
           </div>
         </div>
         
         <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
           <div className="h-96">
-            <Bar ref={barChartRef} data={budgetImpactData} options={barChartOptions} />
+            <Bar 
+              ref={(ref) => {
+                if (ref) {
+                  barChartRef.current = ref;
+                }
+              }} 
+              data={budgetImpactData} 
+              options={barChartOptions} 
+            />
           </div>
         </div>
       </div>
@@ -507,7 +568,7 @@ const CostAnalysis = () => {
           
           <div className="p-4 bg-gray-700/30 rounded-lg border border-pink-500/20">
             <div className="text-pink-400/80 mb-2">Projection</div>
-            <div className="text-pink-300">Stabilisation à 55% fixes d'ici 6 mois</div>
+            <div className="text-pink-300">{"Stabilisation à 55% fixes d'ici 6 mois"}</div>
           </div>
         </div>
       </div>

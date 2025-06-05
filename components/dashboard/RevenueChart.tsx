@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -10,6 +10,11 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ScriptableContext,
+  TooltipItem,
+  ChartOptions,
+  ChartData,
+  ChartDataset
 } from 'chart.js';
 
 ChartJS.register(
@@ -24,9 +29,7 @@ ChartJS.register(
 );
 
 const RevenueChart = () => {
-  const chartRef = useRef(null);
-
-  const data = {
+  const data: ChartData<"line", number[], string> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
@@ -40,18 +43,25 @@ const RevenueChart = () => {
         pointHoverRadius: 8,
         fill: {
           target: 'origin',
-          above: (ctx) => {
-            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+          above: (ctx: ScriptableContext<"line">) => {
+            const chart = ctx.chart;
+            const { ctx: context, chartArea } = chart;
+            if (!chartArea) return 'transparent';
+
+            const gradient = context.createLinearGradient(
+              0, chartArea.top,
+              0, chartArea.bottom
+            );
             gradient.addColorStop(0, 'rgba(0, 243, 255, 0.1)');
             gradient.addColorStop(1, 'rgba(0, 243, 255, 0)');
             return gradient;
           }
         },
-      },
+      } as ChartDataset<"line", number[]> // Type assertion for fill property
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
     elements: {
@@ -80,13 +90,13 @@ const RevenueChart = () => {
         borderWidth: 1,
         padding: 12,
         callbacks: {
-          label: (ctx) => ` $${ctx.parsed.y}K`
+          label: (ctx: TooltipItem<"line">) => ` $${ctx.parsed.y}K`
         }
       }
     },
     scales: {
       x: {
-        grid: { 
+        grid: {
           color: 'rgba(0, 243, 255, 0.1)',
           drawTicks: false
         },
@@ -96,25 +106,26 @@ const RevenueChart = () => {
         }
       },
       y: {
-        grid: { 
+        grid: {
           color: 'rgba(0, 243, 255, 0.1)',
           drawTicks: false
         },
         ticks: {
           color: '#00f3ff',
-          callback: (value) => `$${value}K`,
+          callback: (value: string | number) => `$${value}K`,
           font: { family: 'monospace' }
         }
       }
     },
+    // Using type assertion for animation due to complex ChartJS types
     animation: {
       tension: {
         duration: 1000,
-        easing: 'easeOutQuint',
+        easing: 'easeOutQuint' as const,
         from: 0.6,
         to: 0.4
       }
-    }
+    } as ChartOptions<'line'>['animation']
   };
 
   return (
@@ -126,9 +137,8 @@ const RevenueChart = () => {
       transition-all duration-500
     ">
       <div className="h-72 w-full relative">
-        <Line 
-          ref={chartRef}
-          data={data} 
+        <Line
+          data={data}
           options={options}
         />
         <div className="

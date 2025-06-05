@@ -1,19 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiSearch, FiUser, FiMail, FiPhone, FiStar, FiEdit, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import ClientDetailsModal from './ClientDetailsModal'; // Assurez-vous que ce chemin est correct
+import { FiX, FiSearch, FiUser, FiMail, FiPhone, FiStar, FiEdit, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import ClientDetailsModal from './ClientDetailsModal'; 
 
-const ClientsListModal = ({ clients, onClose }) => {
+// Définition des interfaces
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  status: string;
+  paymentMethod: string;
+  totalSpent: string;
+  transactions: number;
+  lastTransaction?: string;
+}
+
+interface ClientsListModalProps {
+  clients: Client[];
+  onClose: () => void;
+}
+
+interface ActiveFilters {
+  status: string[];
+  paymentMethod: string[];
+}
+
+interface SortConfig {
+  key: keyof Client | null;
+  direction: 'asc' | 'desc';
+}
+
+const ClientsListModal = ({ clients, onClose }: ClientsListModalProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredClients, setFilteredClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [activeFilters, setActiveFilters] = useState({
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ 
+    key: null, 
+    direction: 'asc' 
+  });
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
     status: [],
     paymentMethod: []
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Initialisation et filtrage
   useEffect(() => {
     const results = clients.filter(client => {
       const matchesSearch = 
@@ -30,14 +60,30 @@ const ClientsListModal = ({ clients, onClose }) => {
       return matchesSearch && matchesStatus && matchesPayment;
     });
 
-    // Tri des résultats
     const sortedResults = [...results].sort((a, b) => {
       if (!sortConfig.key) return 0;
       
-      if (a[sortConfig.key] < b[sortConfig.key]) {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      // Gestion des valeurs optionnelles
+      if (aValue === undefined || bValue === undefined) return 0;
+
+      // Tri numérique pour les nombres
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' 
+          ? aValue - bValue 
+          : bValue - aValue;
+      }
+
+      // Tri alphabétique pour les chaînes
+      const stringA = String(aValue);
+      const stringB = String(bValue);
+      
+      if (stringA < stringB) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
+      if (stringA > stringB) {
         return sortConfig.direction === 'asc' ? 1 : -1;
       }
       return 0;
@@ -46,15 +92,15 @@ const ClientsListModal = ({ clients, onClose }) => {
     setFilteredClients(sortedResults);
   }, [clients, searchTerm, activeFilters, sortConfig]);
 
-  const handleSort = (key) => {
-    let direction = 'asc';
+  const handleSort = (key: keyof Client) => {
+    let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
   };
 
-  const toggleFilter = (filterType, value) => {
+  const toggleFilter = (filterType: keyof ActiveFilters, value: string) => {
     setActiveFilters(prev => ({
       ...prev,
       [filterType]: prev[filterType].includes(value)
@@ -281,7 +327,7 @@ const ClientsListModal = ({ clients, onClose }) => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="py-8 text-center text-cyan-400/60">
+                    <td colSpan={5} className="py-8 text-center text-cyan-400/60">
                       Aucun client trouvé avec ces critères
                     </td>
                   </tr>
@@ -291,8 +337,7 @@ const ClientsListModal = ({ clients, onClose }) => {
           </div>
         </div>
         
-        {/* Résumé des filtres actifs */}
-        {Object.values(activeFilters).some(arr => arr.length > 0) && (
+        {(activeFilters.status.length > 0 || activeFilters.paymentMethod.length > 0) && (
           <div className="p-4 border-t border-cyan-500/30 bg-gray-800/40">
             <div className="flex flex-wrap gap-2">
               {activeFilters.status.map(status => (
@@ -333,7 +378,6 @@ const ClientsListModal = ({ clients, onClose }) => {
           </div>
         )}
         
-        {/* Effet de lueur */}
         <div className="
           absolute inset-0 rounded-xl 
           bg-gradient-to-br from-cyan-500/10 to-blue-500/10 
@@ -346,7 +390,6 @@ const ClientsListModal = ({ clients, onClose }) => {
   );
 };
 
-// Données de démonstration
 ClientsListModal.defaultProps = {
   clients: [
     {

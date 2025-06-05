@@ -1,7 +1,18 @@
 import React from 'react';
 
+// Définir les types pour les paramètres
+type PriorityLevel = 'high' | 'medium' | 'low';
+
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  date: string;
+  priority: PriorityLevel;
+}
+
 const Notifications = () => {
-  const notifications = [
+  const notifications: Notification[] = [
     {
       id: 1,
       title: 'Facture en retard',
@@ -25,7 +36,7 @@ const Notifications = () => {
     },
   ];
 
-  const getPriorityStyle = (priority) => {
+  const getPriorityStyle = (priority: PriorityLevel) => {
     switch (priority) {
       case 'high':
         return 'from-red-400 to-pink-500';

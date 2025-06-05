@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
 import { FiEye, FiDownload, FiPrinter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
+// Définition des types
+interface Transaction {
+  id: number;
+  client: string;
+  invoiceNumber: string;
+  amount: string;
+  status: 'payée' | 'en attente' | 'en retard';
+  dueDate: string;
+}
+
 const TransactionList = () => {
-  const allTransactions = [
-    // ... (votre liste de transactions existante)
+  const allTransactions: Transaction[] = [
     {
       id: 1,
       client: 'Client A',
@@ -85,7 +94,7 @@ const TransactionList = () => {
   );
 
   // Styles dynamiques pour le statut
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: 'payée' | 'en attente' | 'en retard') => {
     switch (status) {
       case 'payée':
         return 'bg-gradient-to-r from-green-500/20 to-cyan-600/20 text-green-400 border-green-500/40';
@@ -111,18 +120,18 @@ const TransactionList = () => {
     }
   };
 
-  const goToPage = (page) => {
+  const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
   // Actions
-  const viewDetails = (id) => {
+  const viewDetails = (id: number) => {
     console.log(`View details for transaction ${id}`);
   };
 
-  const downloadInvoice = (id) => {
+  const downloadInvoice = (id: number) => {
     console.log(`Download invoice for transaction ${id}`);
   };
 
@@ -131,7 +140,7 @@ const TransactionList = () => {
     const buttons = [];
     const maxVisibleButtons = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
     
     if (endPage - startPage < maxVisibleButtons - 1) {
       startPage = Math.max(1, endPage - maxVisibleButtons + 1);

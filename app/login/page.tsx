@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiUser, FiLock, FiMail, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
+import { FiLock, FiMail, FiEye, FiEyeOff, FiCheck } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AuthForm() {
@@ -14,60 +14,60 @@ export default function AuthForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  
+
   const router = useRouter();
 
   const validateForm = () => {
     setError('');
-    
+
     // Validation email
     if (!email) {
       setError('Veuillez entrer votre email');
       return false;
     }
-    
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Veuillez entrer une adresse email valide');
       return false;
     }
-    
+
     // Validation mot de passe
     if (!password) {
       setError('Veuillez entrer votre mot de passe');
       return false;
     }
-    
+
     if (!isLogin) {
       if (password.length < 6) {
         setError('Le mot de passe doit contenir au moins 6 caractères');
         return false;
       }
-      
+
       if (password !== confirmPassword) {
         setError('Les mots de passe ne correspondent pas');
         return false;
       }
-      
+
       if (!acceptTerms) {
         setError('Vous devez accepter les conditions d\'utilisation');
         return false;
       }
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
     setError('');
-    
+
     try {
       const endpoint = isLogin ? '/api/auth/signin' : '/api/auth/signup';
-      
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,8 +81,12 @@ export default function AuthForm() {
 
       // Redirection après connexion réussie
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Échec de l\'authentification');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Une erreur inconnue est survenue');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -91,17 +95,17 @@ export default function AuthForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
       <div className="relative w-full max-w-md">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="relative bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-2xl shadow-2xl overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10"></div>
-          
+
           <div className="relative p-8">
             <div className="text-center mb-8">
-              <motion.h1 
+              <motion.h1
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-3xl font-bold text-cyan-300 mb-2"
@@ -109,15 +113,15 @@ export default function AuthForm() {
                 {isLogin ? 'Connexion' : 'Inscription'}
               </motion.h1>
               <p className="text-cyan-400/80">
-                {isLogin 
-                  ? 'Entrez vos identifiants pour accéder à votre compte' 
+                {isLogin
+                  ? 'Entrez vos identifiants pour accéder à votre compte'
                   : 'Créez un compte pour commencer votre expérience'}
               </p>
             </div>
-    
+
             <AnimatePresence>
               {error && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
@@ -127,7 +131,7 @@ export default function AuthForm() {
                 </motion.div>
               )}
             </AnimatePresence>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="relative">
                 <label className="block text-cyan-300 mb-2">Email</label>
@@ -143,7 +147,7 @@ export default function AuthForm() {
                   />
                 </div>
               </div>
-              
+
               <div className="relative">
                 <label className="block text-cyan-300 mb-2">Mot de passe</label>
                 <div className="relative">
@@ -169,7 +173,7 @@ export default function AuthForm() {
                   <p className="mt-1 text-xs text-cyan-400/60">Minimum 6 caractères</p>
                 )}
               </div>
-              
+
               {!isLogin && (
                 <>
                   <motion.div
@@ -198,36 +202,34 @@ export default function AuthForm() {
                       </button>
                     </div>
                   </motion.div>
-                  
+
                   <div className="flex items-start">
                     <button
                       type="button"
                       onClick={() => setAcceptTerms(!acceptTerms)}
-                      className={`flex-shrink-0 h-5 w-5 mt-0.5 flex items-center justify-center rounded border ${
-                        acceptTerms 
-                          ? 'bg-cyan-500 border-cyan-500' 
+                      className={`flex-shrink-0 h-5 w-5 mt-0.5 flex items-center justify-center rounded border ${acceptTerms
+                          ? 'bg-cyan-500 border-cyan-500'
                           : 'border-gray-600'
-                      }`}
+                        }`}
                       aria-checked={acceptTerms}
                       role="checkbox"
                     >
                       {acceptTerms && <FiCheck className="text-white text-xs" />}
                     </button>
                     <label className="ml-3 text-cyan-300 text-sm">
-                      J'accepte les <a href="/terms" className="text-cyan-400 hover:underline">conditions d'utilisation</a>
+                      {"J'accepte les"} <a href="/terms" className="text-cyan-400 hover:underline">{"conditions d'utilisation"}</a>
                     </label>
                   </div>
                 </>
               )}
-              
+
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center ${
-                  isLoading
+                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center ${isLoading
                     ? 'bg-cyan-700 cursor-not-allowed'
                     : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500'
-                }`}
+                  }`}
                 aria-busy={isLoading}
               >
                 {isLoading ? (
@@ -238,11 +240,11 @@ export default function AuthForm() {
                 ) : isLogin ? 'Se connecter' : 'S\'inscrire'}
               </button>
             </form>
-            
+
             <div className="mt-6 text-center">
               <p className="text-cyan-300">
                 {isLogin ? 'Nouveau ici?' : 'Vous avez déjà un compte?'}{' '}
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setIsLogin(!isLogin);
@@ -255,7 +257,7 @@ export default function AuthForm() {
               </p>
             </div>
           </div>
-          
+
           <div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 p-4 text-center text-cyan-300 text-sm">
             © {new Date().getFullYear()} Votre Société. Tous droits réservés.
           </div>

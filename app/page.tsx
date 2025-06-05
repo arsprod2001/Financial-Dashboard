@@ -1,11 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import { authenticateUser } from '@/lib/auth'
 import {
-  Settings, User, Mail, LayoutDashboard,
-  FileText, DollarSign, TrendingUp, BarChart2,
+  Settings, User, LayoutDashboard, DollarSign, TrendingUp, BarChart2,
   CreditCard, PieChart, FileBarChart, Menu, X,
   Search, Bell, ChevronLeft, ChevronRight, Plus
 } from 'lucide-react';

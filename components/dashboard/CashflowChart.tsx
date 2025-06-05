@@ -8,6 +8,9 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
+  AnimationSpec,
+  ChartOptions
 } from 'chart.js';
 
 ChartJS.register(
@@ -21,7 +24,6 @@ ChartJS.register(
 
 const CashflowChart = () => {
   const chartRef = useRef(null);
-  const [neonGradient, setNeonGradient] = useState(null);
 
   const [chartData, setChartData] = useState({
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
@@ -30,7 +32,7 @@ const CashflowChart = () => {
         label: 'Cashflow',
         data: [35, 15, -10, 20, -5, 10, 30],
         backgroundColor: [
-          '#00f3ff80', '#00f3ff80', '#ff206e80', '#00f3ff80', 
+          '#00f3ff80', '#00f3ff80', '#ff206e80', '#00f3ff80',
           '#ff206e80', '#00f3ff80', '#00f3ff80'
         ],
         borderColor: [
@@ -63,7 +65,7 @@ const CashflowChart = () => {
     return () => clearInterval(interval);
   }, [chartData]);
 
-  const options = {
+  const options: Partial<ChartOptions<'bar'>> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -88,7 +90,7 @@ const CashflowChart = () => {
         borderWidth: 1,
         padding: 12,
         callbacks: {
-          label: (context) => ` $${context.parsed.y}K`
+          label: (context: TooltipItem<'bar'>) => ` $${context.parsed.y}K`
         }
       }
     },
@@ -112,7 +114,7 @@ const CashflowChart = () => {
         },
         ticks: {
           color: '#00f3ff',
-          callback: (value) => `$${value}K`,
+          callback: (value: number | string) => `$${value}K`,
           font: {
             weight: 'bold',
           },
@@ -122,7 +124,7 @@ const CashflowChart = () => {
     animation: {
       duration: 1000,
       easing: 'easeOutCubic',
-    }
+    } as Partial<AnimationSpec<'bar'>>,
   };
 
   return (
@@ -134,10 +136,10 @@ const CashflowChart = () => {
       neon-glow
     ">
       <div className="h-64 w-full">
-        <Bar 
+        <Bar
           ref={chartRef}
-          data={chartData} 
-          options={options} 
+          data={chartData}
+          options={options}
         />
       </div>
 

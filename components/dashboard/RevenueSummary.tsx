@@ -8,6 +8,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  type ChartOptions,       // <- on importe le type
 } from 'chart.js';
 
 ChartJS.register(
@@ -33,11 +34,12 @@ const RevenueSummary = () => {
     ],
   };
 
-  const chartOptions = {
+  // 1) On précise que chartOptions est de type ChartOptions<'bar'>
+  const chartOptions: ChartOptions<'bar'> = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top', // <-- 'top' est un littéral valide dans ChartOptions<'bar'>
       },
       title: {
         display: true,
@@ -68,7 +70,10 @@ const RevenueSummary = () => {
       <div className="mb-8">
         <h3 className="text-xl font-medium text-gray-700 mb-4">Comparatif mensuel</h3>
         <div className="p-6 bg-white rounded-lg shadow-sm">
-          <Bar data={monthlyComparisonData} options={chartOptions} />
+          <Bar
+            data={monthlyComparisonData}
+            options={chartOptions} // <- ici, chartOptions est correctement typé
+          />
         </div>
       </div>
 
@@ -76,11 +81,11 @@ const RevenueSummary = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="p-6 bg-white rounded-lg shadow-sm">
           <h3 className="text-lg font-medium text-gray-700 mb-2">Mois le plus performant</h3>
-          <p className="text-2xl font-bold text-blue-600">Jun - 220 k€</p>
+          <p className="text-2xl font-bold text-blue-600">Jun – 220 k€</p>
         </div>
         <div className="p-6 bg-white rounded-lg shadow-sm">
           <h3 className="text-lg font-medium text-gray-700 mb-2">Mois le moins performant</h3>
-          <p className="text-2xl font-bold text-red-600">Jan - 120 k€</p>
+          <p className="text-2xl font-bold text-red-600">Jan – 120 k€</p>
         </div>
       </div>
     </div>

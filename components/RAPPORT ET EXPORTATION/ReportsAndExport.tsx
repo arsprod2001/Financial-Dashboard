@@ -1,14 +1,38 @@
 import React, { useState } from 'react';
 import { FiDownload, FiFileText, FiFilter, FiRefreshCw, FiSearch, FiPrinter, FiMail, FiBarChart2, FiPieChart, FiTrendingUp } from 'react-icons/fi';
 
-const ReportsAndExport = () => {
-  const [reportType, setReportType] = useState('financier');
-  const [timePeriod, setTimePeriod] = useState('mois');
-  const [exportFormat, setExportFormat] = useState('pdf');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedReports, setSelectedReports] = useState([]);
+// Définition des types
+interface ReportType {
+  id: string;
+  name: string;
+  icon: JSX.Element;
+}
 
-  const reportTypes = [
+interface Report {
+  id: number;
+  title: string;
+  type: string;
+  date: string;
+  size: string;
+  generatedBy: string;
+}
+
+interface ExportHistoryItem {
+  id: number;
+  report: string;
+  format: string;
+  date: string;
+  user: string;
+}
+
+const ReportsAndExport = () => {
+  const [reportType, setReportType] = useState<string>('financier');
+  const [timePeriod, setTimePeriod] = useState<string>('mois');
+  const [exportFormat, setExportFormat] = useState<string>('pdf');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedReports, setSelectedReports] = useState<number[]>([]);
+
+  const reportTypes: ReportType[] = [
     { id: 'financier', name: 'Financier', icon: <FiBarChart2 /> },
     { id: 'ventes', name: 'Ventes', icon: <FiTrendingUp /> },
     { id: 'depenses', name: 'Dépenses', icon: <FiPieChart /> },
@@ -16,7 +40,7 @@ const ReportsAndExport = () => {
     { id: 'performance', name: 'Performance', icon: <FiTrendingUp /> }
   ];
 
-  const reports = [
+  const reports: Report[] = [
     {
       id: 1,
       title: 'Bilan Financier Annuel',
@@ -67,7 +91,7 @@ const ReportsAndExport = () => {
     }
   ];
 
-  const exportHistory = [
+  const exportHistory: ExportHistoryItem[] = [
     { id: 1, report: 'Bilan Financier Annuel', format: 'PDF', date: '2023-11-15 14:30', user: 'admin@entreprise.com' },
     { id: 2, report: 'Analyse des Ventes Trimestrielles', format: 'Excel', date: '2023-11-10 11:22', user: 'marie.dupont@entreprise.com' },
     { id: 3, report: 'Projections de Trésorerie 2024', format: 'CSV', date: '2023-11-05 09:45', user: 'jean.martin@entreprise.com' },
@@ -80,7 +104,7 @@ const ReportsAndExport = () => {
     return matchesType && matchesSearch;
   });
 
-  const toggleReportSelection = (id) => {
+  const toggleReportSelection = (id: number) => {
     if (selectedReports.includes(id)) {
       setSelectedReports(selectedReports.filter(reportId => reportId !== id));
     } else {
@@ -232,10 +256,10 @@ const ReportsAndExport = () => {
         </div>
         
         <div className="bg-gray-800/40 rounded-xl border border-green-500/30 p-5">
-          <h3 className="text-lg font-bold text-green-400 mb-4">Options d'exportation</h3>
+          <h3 className="text-lg font-bold text-green-400 mb-4">{"Options d'exportation"}</h3>
           
           <div className="mb-4">
-            <label className="block text-cyan-400/80 mb-2">Format d'export</label>
+            <label className="block text-cyan-400/80 mb-2">{"Format d'export"}</label>
             <div className="grid grid-cols-3 gap-2">
               {['pdf', 'excel', 'csv'].map(format => (
                 <button
@@ -435,7 +459,7 @@ const ReportsAndExport = () => {
               <tr className="border-b border-cyan-500/30">
                 <th className="text-left py-3 px-4 text-cyan-400">Rapport</th>
                 <th className="text-left py-3 px-4 text-cyan-400">Format</th>
-                <th className="text-left py-3 px-4 text-cyan-400">Date d'export</th>
+                <th className="text-left py-3 px-4 text-cyan-400">{"Date d'export"}</th>
                 <th className="text-left py-3 px-4 text-cyan-400">Utilisateur</th>
                 <th className="text-left py-3 px-4 text-cyan-400">Actions</th>
               </tr>

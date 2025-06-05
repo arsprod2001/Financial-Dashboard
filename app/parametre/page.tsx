@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { FiUser, FiLock, FiBell, FiCreditCard, FiDatabase, FiShield, FiGlobe, FiMail, FiTrash2, FiLogOut, FiChevronDown, FiCheck, FiX, FiAlertCircle } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiUser, FiLock, FiBell, FiCreditCard, FiDatabase, FiGlobe, FiMail, FiTrash2, FiLogOut, FiChevronDown, FiCheck, FiAlertCircle } from 'react-icons/fi';
 
 const SettingsPage = () => {
   // États pour les différents paramètres
@@ -28,28 +28,32 @@ const SettingsPage = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKey] = useState('sk_live_51Hq9Z8K3d8p7g2F8w7v5x9zA4b3c6d7e8f9g0h1i2j3k4l5');
 
+  type NotificationType = 'email' | 'push' | 'weeklyReport' | 'promotions';
+  type SecurityType = 'twoFactor' | 'loginAlerts' | 'passwordChangeRequired';
+
   // Fonction pour basculer les notifications
-  const toggleNotification = (type) => {
-    setNotifications({
-      ...notifications,
-      [type]: !notifications[type]
-    });
+  const toggleNotification = (type: NotificationType) => {
+    setNotifications((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+  // Fonction pour basculer la sécurité
+  const toggleSecurity = (type: SecurityType) => {
+    setSecurity((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
   };
 
-  // Fonction pour basculer la sécurité
-  const toggleSecurity = (type) => {
-    setSecurity({
-      ...security,
-      [type]: !security[type]
-    });
-  };
+  type PlanType = 'pro' | 'premium' | 'enterprise'; // selon tes plans réels
 
   // Fonction pour changer le plan
-  const changePlan = (plan) => {
-    setBilling({
-      ...billing,
-      plan
-    });
+  const changePlan = (plan: PlanType) => {
+    setBilling((prev) => ({
+      ...prev,
+      plan,
+    }));
   };
 
   // Fonction pour confirmer la suppression du compte
@@ -93,11 +97,10 @@ const SettingsPage = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
-                    activeTab === item.id
-                      ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
-                      : 'hover:bg-gray-700/50'
-                  }`}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${activeTab === item.id
+                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                    : 'hover:bg-gray-700/50'
+                    }`}
                 >
                   <span className="text-lg">{item.icon}</span>
                   <span>{item.label}</span>
@@ -129,7 +132,7 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
                   <FiUser /> Informations du profil
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-cyan-300 mb-2">Nom complet</label>
@@ -139,7 +142,7 @@ const SettingsPage = () => {
                       className="w-full bg-gray-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-cyan-300 mb-2">Email</label>
                     <input
@@ -148,7 +151,7 @@ const SettingsPage = () => {
                       className="w-full bg-gray-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-cyan-300 mb-2">Entreprise</label>
                     <input
@@ -157,7 +160,7 @@ const SettingsPage = () => {
                       className="w-full bg-gray-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-cyan-300 mb-2">Téléphone</label>
                     <input
@@ -167,16 +170,16 @@ const SettingsPage = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="mt-6">
                   <label className="block text-cyan-300 mb-2">Bio</label>
                   <textarea
                     defaultValue="Administrateur système et expert en cybersécurité"
-                    rows="3"
+                    rows={3}
                     className="w-full bg-gray-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                   ></textarea>
                 </div>
-                
+
                 <div className="flex justify-end mt-8">
                   <button className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity">
                     Enregistrer les modifications
@@ -191,7 +194,7 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
                   <FiLock /> Sécurité du compte
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
@@ -201,16 +204,14 @@ const SettingsPage = () => {
                           Ajoutez une couche de sécurité supplémentaire à votre compte
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleSecurity('twoFactor')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          security.twoFactor ? 'bg-green-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            security.twoFactor ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${security.twoFactor ? 'bg-green-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${security.twoFactor ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
@@ -221,39 +222,37 @@ const SettingsPage = () => {
                         </p>
                         <div className="mt-3 flex gap-2">
                           <button className="px-3 py-1 text-sm bg-gray-700 rounded-lg border border-gray-600">
-                            Configurer l'authentificateur
+                            {"Configurer l'authentificateur"}
                           </button>
                           <button className="px-3 py-1 text-sm bg-gray-700 rounded-lg border border-gray-600">
-                            Gérer les appareils
+                            {"Gérer les appareils"}
                           </button>
                         </div>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
                       <div>
                         <h3 className="font-medium text-lg text-cyan-300">Alertes de connexion</h3>
                         <p className="text-cyan-400/60 mt-1">
-                          Recevez une notification lorsqu'une nouvelle connexion est détectée
+                          {"Recevez une notification lorsqu'une nouvelle connexion est détectée"}
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleSecurity('loginAlerts')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          security.loginAlerts ? 'bg-green-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            security.loginAlerts ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${security.loginAlerts ? 'bg-green-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${security.loginAlerts ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
                       <div>
@@ -262,21 +261,19 @@ const SettingsPage = () => {
                           Vous devrez changer votre mot de passe lors de votre prochaine connexion
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleSecurity('passwordChangeRequired')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          security.passwordChangeRequired ? 'bg-amber-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            security.passwordChangeRequired ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${security.passwordChangeRequired ? 'bg-amber-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${security.passwordChangeRequired ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-8">
                     <h3 className="font-medium text-lg text-cyan-300 mb-4">Sessions actives</h3>
                     <div className="space-y-3">
@@ -294,7 +291,7 @@ const SettingsPage = () => {
                           Déconnecter
                         </button>
                       </div>
-                      
+
                       <div className="p-3 bg-gray-900/50 rounded-lg border border-gray-700 flex justify-between items-center">
                         <div>
                           <div className="font-medium">New York, États-Unis</div>
@@ -321,7 +318,7 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
                   <FiBell /> Préférences de notification
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
@@ -331,21 +328,19 @@ const SettingsPage = () => {
                           Recevez des notifications importantes par email
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleNotification('email')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          notifications.email ? 'bg-green-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            notifications.email ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${notifications.email ? 'bg-green-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${notifications.email ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
                       <div>
@@ -354,21 +349,19 @@ const SettingsPage = () => {
                           Recevez des notifications sur votre appareil
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleNotification('push')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          notifications.push ? 'bg-green-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            notifications.push ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${notifications.push ? 'bg-green-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${notifications.push ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
                       <div>
@@ -377,21 +370,19 @@ const SettingsPage = () => {
                           Recevez un résumé hebdomadaire de votre activité
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleNotification('weeklyReport')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          notifications.weeklyReport ? 'bg-green-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            notifications.weeklyReport ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${notifications.weeklyReport ? 'bg-green-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${notifications.weeklyReport ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
                     <div className="flex justify-between items-center">
                       <div>
@@ -400,21 +391,19 @@ const SettingsPage = () => {
                           Recevez des offres spéciales et des mises à jour
                         </p>
                       </div>
-                      <div 
+                      <div
                         onClick={() => toggleNotification('promotions')}
-                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                          notifications.promotions ? 'bg-green-500' : 'bg-gray-600'
-                        }`}
-                      >
-                        <span 
-                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                            notifications.promotions ? 'translate-x-6' : 'translate-x-1'
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${notifications.promotions ? 'bg-green-500' : 'bg-gray-600'
                           }`}
+                      >
+                        <span
+                          className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${notifications.promotions ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-8">
                     <h3 className="font-medium text-lg text-cyan-300 mb-4">Configuration des notifications par email</h3>
                     <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
@@ -425,7 +414,7 @@ const SettingsPage = () => {
                           <div className="text-sm text-cyan-400/60">Adresse email principale</div>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4">
                         <label className="block text-cyan-300 mb-2">Ajouter une adresse email supplémentaire</label>
                         <div className="flex gap-2">
@@ -451,7 +440,7 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
                   <FiCreditCard /> Abonnement & Facturation
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   <div className="bg-gray-900/50 rounded-xl border border-gray-700 p-6">
                     <h3 className="font-bold text-cyan-300 text-xl mb-2">Votre abonnement</h3>
@@ -472,18 +461,17 @@ const SettingsPage = () => {
                         <FiCheck className="text-green-400" /> Rapports avancés
                       </li>
                     </ul>
-                    <button 
+                    <button
                       onClick={() => changePlan('premium')}
-                      className={`w-full py-2 rounded-lg border ${
-                        billing.plan === 'premium'
-                          ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
-                          : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                      }`}
+                      className={`w-full py-2 rounded-lg border ${billing.plan === 'premium'
+                        ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
+                        : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                        }`}
                     >
                       {billing.plan === 'premium' ? 'Plan actuel' : 'Passer à Premium'}
                     </button>
                   </div>
-                  
+
                   <div className="bg-gray-900/50 rounded-xl border border-gray-700 p-6">
                     <h3 className="font-bold text-cyan-300 text-xl mb-2">Plan Professionnel</h3>
                     <div className="text-4xl font-bold text-cyan-400 mb-4">
@@ -503,18 +491,17 @@ const SettingsPage = () => {
                         <FiCheck className="text-green-400" /> Intégrations personnalisées
                       </li>
                     </ul>
-                    <button 
+                    <button
                       onClick={() => changePlan('pro')}
-                      className={`w-full py-2 rounded-lg border ${
-                        billing.plan === 'pro'
-                          ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
-                          : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                      }`}
+                      className={`w-full py-2 rounded-lg border ${billing.plan === 'pro'
+                        ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
+                        : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                        }`}
                     >
                       {billing.plan === 'pro' ? 'Plan actuel' : 'Passer à Professionnel'}
                     </button>
                   </div>
-                  
+
                   <div className="bg-gray-900/50 rounded-xl border border-gray-700 p-6">
                     <h3 className="font-bold text-cyan-300 text-xl mb-2">Plan Entreprise</h3>
                     <div className="text-cyan-400 text-xl mb-4">Prix personnalisé</div>
@@ -532,19 +519,18 @@ const SettingsPage = () => {
                         <FiCheck className="text-green-400" /> Formation et implémentation
                       </li>
                     </ul>
-                    <button 
+                    <button
                       onClick={() => changePlan('enterprise')}
-                      className={`w-full py-2 rounded-lg border ${
-                        billing.plan === 'enterprise'
-                          ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
-                          : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                      }`}
+                      className={`w-full py-2 rounded-lg border ${billing.plan === 'enterprise'
+                        ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
+                        : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                        }`}
                     >
                       {billing.plan === 'enterprise' ? 'Plan actuel' : 'Contacter les ventes'}
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-900/50 rounded-xl border border-gray-700 p-6 mb-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-cyan-300 text-lg">Méthode de paiement</h3>
@@ -552,7 +538,7 @@ const SettingsPage = () => {
                       Modifier
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-8 bg-gradient-to-r from-purple-600 to-indigo-700 rounded-md flex items-center justify-center">
                       <FiCreditCard className="text-white" />
@@ -562,24 +548,22 @@ const SettingsPage = () => {
                       <div className="text-sm text-cyan-400/60">Expire le 12/2025</div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 flex items-center gap-2">
-                    <div 
-                      onClick={() => setBilling({...billing, autoRenew: !billing.autoRenew})}
-                      className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${
-                        billing.autoRenew ? 'bg-green-500' : 'bg-gray-600'
-                      }`}
-                    >
-                      <span 
-                        className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
-                          billing.autoRenew ? 'translate-x-6' : 'translate-x-1'
+                    <div
+                      onClick={() => setBilling({ ...billing, autoRenew: !billing.autoRenew })}
+                      className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors ${billing.autoRenew ? 'bg-green-500' : 'bg-gray-600'
                         }`}
+                    >
+                      <span
+                        className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${billing.autoRenew ? 'translate-x-6' : 'translate-x-1'
+                          }`}
                       />
                     </div>
                     <span>Renouvellement automatique</span>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-900/50 rounded-xl border border-gray-700 p-6">
                   <h3 className="font-bold text-cyan-300 text-lg mb-4">Historique de facturation</h3>
                   <div className="overflow-x-auto">
@@ -640,7 +624,7 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
                   <FiDatabase /> API & Intégrations
                 </h2>
-                
+
                 <div className="mb-8">
                   <h3 className="font-bold text-cyan-300 text-lg mb-4">Clé API</h3>
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700 flex justify-between items-center">
@@ -655,11 +639,11 @@ const SettingsPage = () => {
                         </div>
                       )}
                       <div className="text-sm text-cyan-400/60 mt-2">
-                        Utilisez cette clé pour accéder à l'API
+                        {"Utilisez cette clé pour accéder à l'API"}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => setShowApiKey(!showApiKey)}
                         className="px-3 py-1 bg-gray-800 rounded-lg border border-gray-700 hover:bg-gray-700"
                       >
@@ -675,7 +659,7 @@ const SettingsPage = () => {
                     Gardez votre clé API secrète - ne la partagez jamais en public
                   </div>
                 </div>
-                
+
                 <div className="mb-8">
                   <h3 className="font-bold text-cyan-300 text-lg mb-4">Applications connectées</h3>
                   <div className="space-y-3">
@@ -695,7 +679,7 @@ const SettingsPage = () => {
                         Déconnecter
                       </button>
                     </div>
-                    
+
                     <div className="p-3 bg-gray-900/50 rounded-lg border border-gray-700 flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -704,7 +688,7 @@ const SettingsPage = () => {
                         <div>
                           <div className="font-medium">Slack</div>
                           <div className="text-sm text-cyan-400/60">
-                            Notifications et intégration d'équipe
+                            {"Notifications et intégration d'équipe"}
                           </div>
                         </div>
                       </div>
@@ -714,7 +698,7 @@ const SettingsPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="font-bold text-cyan-300 text-lg mb-4">Intégrations disponibles</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -745,9 +729,9 @@ const SettingsPage = () => {
             {activeTab === 'preferences' && (
               <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
-                  <FiGlobe /> Préférences de l'application
+                  <FiGlobe /> {"Préférences de l'application"}
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-bold text-cyan-300 text-lg mb-4">Langue</h3>
@@ -768,37 +752,35 @@ const SettingsPage = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-bold text-cyan-300 text-lg mb-4">Thème</h3>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setTheme('dark')}
-                        className={`p-4 rounded-lg border flex flex-col items-center ${
-                          theme === 'dark'
-                            ? 'bg-cyan-500/10 border-cyan-500/50'
-                            : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                        }`}
+                        className={`p-4 rounded-lg border flex flex-col items-center ${theme === 'dark'
+                          ? 'bg-cyan-500/10 border-cyan-500/50'
+                          : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                          }`}
                       >
                         <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full mb-2"></div>
                         <span>Sombre</span>
                       </button>
                       <button
                         onClick={() => setTheme('light')}
-                        className={`p-4 rounded-lg border flex flex-col items-center ${
-                          theme === 'light'
-                            ? 'bg-amber-500/10 border-amber-500/50'
-                            : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                        }`}
+                        className={`p-4 rounded-lg border flex flex-col items-center ${theme === 'light'
+                          ? 'bg-amber-500/10 border-amber-500/50'
+                          : 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                          }`}
                       >
                         <div className="w-10 h-10 bg-gradient-to-br from-amber-200 to-yellow-300 rounded-full mb-2"></div>
                         <span>Clair</span>
                       </button>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h3 className="font-bold text-cyan-300 text-lg mb-4">Densité d'affichage</h3>
+                    <h3 className="font-bold text-cyan-300 text-lg mb-4">{"Densité d'affichage"}</h3>
                     <div className="grid grid-cols-3 gap-3">
                       <button className="p-3 rounded-lg border bg-gray-800 border-gray-700 hover:bg-gray-700 flex flex-col items-center">
                         <div className="flex gap-1 mb-2">
@@ -826,7 +808,7 @@ const SettingsPage = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-bold text-cyan-300 text-lg mb-4">Zone horaire</h3>
                     <div className="relative">
@@ -845,7 +827,7 @@ const SettingsPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-8">
                   <h3 className="font-bold text-cyan-300 text-lg mb-4">Paramètres avancés</h3>
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
@@ -856,15 +838,15 @@ const SettingsPage = () => {
                           Afficher les outils de développement et les logs
                         </div>
                       </div>
-                      <div 
+                      <div
                         className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors bg-gray-600`}
                       >
-                        <span 
+                        <span
                           className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1`}
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="font-medium">Partage de données anonymes</div>
@@ -872,10 +854,10 @@ const SettingsPage = () => {
                           Aidez-nous à améliorer le produit
                         </div>
                       </div>
-                      <div 
+                      <div
                         className={`relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer transition-colors bg-green-500`}
                       >
-                        <span 
+                        <span
                           className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-6`}
                         />
                       </div>
@@ -891,7 +873,7 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-bold text-red-400 mb-6 flex items-center gap-2">
                   <FiTrash2 /> Zone dangereuse
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-red-500/30">
                     <h3 className="font-bold text-red-400 text-lg mb-2">Exporter vos données</h3>
@@ -907,7 +889,7 @@ const SettingsPage = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-red-500/30">
                     <h3 className="font-bold text-red-400 text-lg mb-2">Désactiver votre compte</h3>
                     <p className="text-cyan-400/60 mb-4">
@@ -917,26 +899,26 @@ const SettingsPage = () => {
                       Désactiver le compte
                     </button>
                   </div>
-                  
+
                   <div className="p-4 bg-gray-900/50 rounded-lg border border-red-500/30">
                     <h3 className="font-bold text-red-400 text-lg mb-2">Supprimer définitivement votre compte</h3>
                     <p className="text-cyan-400/60 mb-4">
                       Cette action est irréversible. Toutes vos données seront supprimées de nos serveurs.
                     </p>
-                    
+
                     {deleteConfirm ? (
                       <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/30">
                         <p className="text-red-400 mb-3">
                           Êtes-vous absolument sûr de vouloir supprimer votre compte?
                         </p>
                         <div className="flex gap-2">
-                          <button 
+                          <button
                             onClick={deleteAccount}
                             className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/30 hover:bg-red-500/30"
                           >
                             Oui, supprimer définitivement
                           </button>
-                          <button 
+                          <button
                             onClick={() => setDeleteConfirm(false)}
                             className="px-4 py-2 bg-gray-800 rounded-lg border border-gray-700 hover:bg-gray-700"
                           >
@@ -945,7 +927,7 @@ const SettingsPage = () => {
                         </div>
                       </div>
                     ) : (
-                      <button 
+                      <button
                         onClick={confirmAccountDeletion}
                         className="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg border border-red-500/30 hover:bg-red-500/20"
                       >

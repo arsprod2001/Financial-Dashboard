@@ -10,8 +10,10 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartData,
+  ChartOptions
 } from 'chart.js';
-import { FiAlertTriangle, FiBell, FiChevronDown, FiDollarSign } from 'react-icons/fi';
+import { FiAlertTriangle, FiBell, FiChevronDown} from 'react-icons/fi';
 
 // Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
@@ -26,9 +28,9 @@ ChartJS.register(
 );
 
 const CashflowAlerts = () => {
-  const chartRef = useRef(null);
-  const [lineGradient, setLineGradient] = useState(null);
-  const [expandedAlert, setExpandedAlert] = useState(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [lineGradient, setLineGradient] = useState<CanvasGradient | string | null>(null);
+  const [expandedAlert, setExpandedAlert] = useState<number | null>(null);
 
   // Couleurs néon
   const neonColors = {
@@ -40,15 +42,31 @@ const CashflowAlerts = () => {
     blue: '#00b4d8'
   };
 
+  // Créer le gradient pour la courbe principale
+  useEffect(() => {
+    if (containerRef.current) {
+      const canvas = containerRef.current.querySelector('canvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, `${neonColors.cyan}40`);
+          gradient.addColorStop(1, `${neonColors.cyan}00`);
+          setLineGradient(gradient);
+        }
+      }
+    }
+  }, []);
+
   // Données pour le graphique
-  const data = {
+  const data: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
     datasets: [
       {
         label: 'Solde de trésorerie (k€)',
         data: [80, 85, 90, 95, 100, 105, 110, 115, 110, 105],
         borderColor: neonColors.cyan,
-        backgroundColor: lineGradient,
+        backgroundColor: lineGradient || `${neonColors.cyan}40`,
         borderWidth: 3,
         tension: 0.4,
         pointRadius: 5,
@@ -91,19 +109,8 @@ const CashflowAlerts = () => {
     ],
   };
 
-  // Créer le gradient pour la courbe principale
-  useEffect(() => {
-    if (chartRef.current) {
-      const ctx = chartRef.current.ctx;
-      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, `${neonColors.cyan}40`);
-      gradient.addColorStop(1, `${neonColors.cyan}00`);
-      setLineGradient(gradient);
-    }
-  }, []);
-
   // Options pour le graphique avec style néon
-  const options = {
+  const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -151,6 +158,7 @@ const CashflowAlerts = () => {
     },
     scales: {
       x: {
+        type: 'category',
         grid: {
           color: `${neonColors.cyan}10`,
           drawTicks: false
@@ -165,6 +173,7 @@ const CashflowAlerts = () => {
         }
       },
       y: {
+        type: 'linear',
         grid: {
           color: `${neonColors.cyan}10`,
           drawTicks: false
@@ -176,13 +185,13 @@ const CashflowAlerts = () => {
             weight: 'bold',
             size: 11
           },
-          callback: (value) => `${value} k€`
+          callback: (value: number | string) => `${value} k€`
         }
       }
     },
     animation: {
       duration: 800,
-      easing: 'easeOutQuart'
+      easing: 'easeOutQuad'
     }
   };
 
@@ -237,7 +246,7 @@ const CashflowAlerts = () => {
 
   // Calcul du statut actuel
   const currentStatus = () => {
-    const currentValue = data.datasets[0].data[data.datasets[0].data.length - 1];
+    const currentValue = data.datasets[0].data[data.datasets[0].data.length - 1] as number;
     
     if (currentValue <= 50) return { status: 'CRITIQUE', color: 'text-red-400', bg: 'bg-red-500/10' };
     if (currentValue <= 70) return { status: 'ALERTE', color: 'text-yellow-400', bg: 'bg-yellow-500/10' };
@@ -302,7 +311,7 @@ const CashflowAlerts = () => {
           border border-yellow-500/30
           backdrop-blur-sm
         ">
-          <div className="text-yellow-400/80">Seuil d'alerte</div>
+          <div className="text-yellow-400/80">{"Seuil d'alerte"}</div>
           <div className="text-2xl font-bold text-yellow-400 mt-1">
             70 k€
           </div>
@@ -343,9 +352,12 @@ const CashflowAlerts = () => {
       </div>
 
       {/* Graphique en ligne */}
-      <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6">
+      <div 
+        className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6"
+        ref={containerRef}
+      >
         <div className="h-96">
-          <Line ref={chartRef} data={data} options={options} />
+          <Line data={data} options={options} />
         </div>
       </div>
 
@@ -452,7 +464,7 @@ const CashflowAlerts = () => {
           
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
             <div className="flex justify-between items-center mb-3">
-              <div className="text-cyan-300">Seuil d'alerte</div>
+              <div className="text-cyan-300">{"Seuil d'alerte"}</div>
               <div className="px-3 py-1 bg-yellow-500/10 text-yellow-400 rounded-full text-sm">Alerte</div>
             </div>
             <div className="flex items-end">

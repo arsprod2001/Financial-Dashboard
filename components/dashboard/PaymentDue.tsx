@@ -1,7 +1,18 @@
 import React from 'react';
 
+// Définir les types pour les paramètres
+type PaymentStatus = 'En attente' | 'Payé' | 'En retard';
+
+interface Payment {
+  id: number;
+  title: string;
+  dueDate: string;
+  amount: string;
+  status: PaymentStatus;
+}
+
 const PaymentDue = () => {
-  const payments = [
+  const payments: Payment[] = [
     {
       id: 1,
       title: 'Facture #12345',
@@ -25,7 +36,7 @@ const PaymentDue = () => {
     },
   ];
 
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: PaymentStatus) => {
     switch (status) {
       case 'En attente':
         return 'bg-gradient-to-r from-yellow-500/20 to-amber-600/20 text-yellow-400 border-yellow-500/40';

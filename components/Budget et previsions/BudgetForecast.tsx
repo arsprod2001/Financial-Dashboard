@@ -11,8 +11,12 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ChartData,
+  ChartOptions,
+  TooltipItem,
+  ChartDataset,
 } from 'chart.js';
-import { FiFilter, FiRefreshCw, FiDownload, FiChevronDown, FiTrendingUp, FiAlertCircle } from 'react-icons/fi';
+import { FiFilter, FiRefreshCw, FiDownload, FiAlertCircle } from 'react-icons/fi';
 
 ChartJS.register(
   CategoryScale,
@@ -23,19 +27,28 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
+
 const BudgetForecast = () => {
+
+  type BarGradient = { budget: CanvasGradient; actual: CanvasGradient };
+  type LineGradient = CanvasGradient;
+
+  type ExtendedBarDataset = ChartDataset<'bar', number[]> & {
+    borderRadius?: number;
+    barPercentage?: number;
+  };
+
   const [timePeriod, setTimePeriod] = useState('2023');
   const [activeTab, setActiveTab] = useState('budget');
-  const [showDetails, setShowDetails] = useState(true);
-  const barChartRef = useRef(null);
-  const lineChartRef = useRef(null);
-  const [barGradient, setBarGradient] = useState(null);
-  const [lineGradient, setLineGradient] = useState(null);
+  const barChartRef = useRef<ChartJS<"bar", number[], string> | null>(null);
+  const lineChartRef = useRef<ChartJS<"line", number[], string> | null>(null);
+  const [barGradient, setBarGradient] = useState<BarGradient | null>(null);
+  const [lineGradient, setLineGradient] = useState<LineGradient | null>(null);
 
-  const neonColors = {
+  const NEON_COLORS = {
     cyan: '#00f3ff',
     green: '#39ff14',
     pink: '#ff206e',
@@ -44,64 +57,73 @@ const BudgetForecast = () => {
     blue: '#4361ee'
   };
 
+  const neonColors = NEON_COLORS;
+
   useEffect(() => {
     if (barChartRef.current && lineChartRef.current) {
       const barCtx = barChartRef.current.ctx;
       const lineCtx = lineChartRef.current.ctx;
-      
+
+      // Création des gradients avec vérification de sécurité
       const budgetGradient = barCtx.createLinearGradient(0, 0, 0, 400);
       budgetGradient.addColorStop(0, `${neonColors.cyan}80`);
       budgetGradient.addColorStop(1, `${neonColors.cyan}20`);
-      
+
       const actualGradient = barCtx.createLinearGradient(0, 0, 0, 400);
       actualGradient.addColorStop(0, `${neonColors.purple}80`);
       actualGradient.addColorStop(1, `${neonColors.purple}20`);
-      
+
       const forecastGradient = lineCtx.createLinearGradient(0, 0, 0, 400);
       forecastGradient.addColorStop(0, `${neonColors.green}40`);
       forecastGradient.addColorStop(1, `${neonColors.green}10`);
-      
-      setBarGradient({
-        budget: budgetGradient,
-        actual: actualGradient
-      });
-      
+
+      setBarGradient({ budget: budgetGradient, actual: actualGradient });
       setLineGradient(forecastGradient);
     }
-  }, [timePeriod]);
+  }, [timePeriod, neonColors.cyan, neonColors.green, neonColors.purple]);
 
-  const budgetData = {
+  const budgetData: ChartData<'bar', number[], string> = {
     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
     datasets: [
       {
         label: 'Budget (k$)',
         data: [250, 260, 270, 280],
-        backgroundColor: barGradient?.budget,
+        backgroundColor: barGradient?.budget || neonColors.cyan,
         borderColor: neonColors.cyan,
         borderWidth: 2,
         borderRadius: 4,
         barPercentage: 0.6,
-      },
+      } as ExtendedBarDataset,
       {
         label: 'Réel (k$)',
         data: [240, 255, 265, 290],
-        backgroundColor: barGradient?.actual,
+        backgroundColor: barGradient?.actual || neonColors.purple,
         borderColor: neonColors.purple,
         borderWidth: 2,
         borderRadius: 4,
         barPercentage: 0.6,
-      },
+      } as ExtendedBarDataset,
     ],
   };
 
-  const forecastData = {
+  type ExtendedLineDataset = ChartDataset<'line', number[]> & {
+    pointRadius?: number;
+    pointHoverRadius?: number;
+    pointBackgroundColor?: string;
+    pointBorderColor?: string;
+    pointBorderWidth?: number;
+  };
+
+
+
+  const forecastData: ChartData<'line', number[], string> = {
     labels: ['2023', '2024', '2025', '2026'],
     datasets: [
       {
         label: 'Prévisions (k$)',
         data: [1050, 1150, 1250, 1400],
         borderColor: neonColors.green,
-        backgroundColor: lineGradient,
+        backgroundColor: lineGradient || `${neonColors.green}40`,
         fill: true,
         tension: 0.3,
         pointRadius: 5,
@@ -109,11 +131,12 @@ const BudgetForecast = () => {
         pointBackgroundColor: '#000',
         pointBorderColor: neonColors.green,
         pointBorderWidth: 2,
-      },
+      } as ExtendedLineDataset,
     ],
   };
 
-  const barChartOptions = {
+
+  const barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -155,7 +178,7 @@ const BudgetForecast = () => {
         displayColors: true,
         usePointStyle: true,
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y} k$`
+          label: (ctx: TooltipItem<'bar'>) => ` ${ctx.parsed.y} k$`
         }
       }
     },
@@ -186,33 +209,102 @@ const BudgetForecast = () => {
             weight: 'bold',
             size: 11
           },
-          callback: (value) => `${value} k$`
+          callback: (tickValue: string | number) => `${tickValue} k$`
         }
+
       }
     },
     animation: {
       duration: 800,
-      easing: 'easeOutQuart'
+      easing: 'easeOutQuart' as const // Type spécifique
     }
   };
 
-  const lineChartOptions = {
-    ...barChartOptions,
-    plugins: {
-      ...barChartOptions.plugins,
-      title: {
-        ...barChartOptions.plugins.title,
-        text: 'PRÉVISIONS BUDGÉTAIRES'
+
+ // Remplacer la déclaration de lineChartOptions par :
+const lineChartOptions: ChartOptions<'line'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          size: 12,
+          weight: 'bold'
+        },
+        padding: 20,
+        usePointStyle: true,
       }
     },
-    scales: {
-      ...barChartOptions.scales,
-      y: {
-        ...barChartOptions.scales.y,
-        suggestedMin: 900
+    title: {
+      display: true,
+      text: 'PRÉVISIONS BUDGÉTAIRES',
+      color: neonColors.cyan,
+      font: {
+        family: "'Orbitron', sans-serif",
+        size: 18,
+        weight: 'bold'
+      },
+      padding: {
+        top: 10,
+        bottom: 20
+      }
+    },
+    tooltip: {
+      backgroundColor: '#000',
+      titleColor: neonColors.cyan,
+      bodyColor: '#fff',
+      borderColor: neonColors.cyan,
+      borderWidth: 1,
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      usePointStyle: true,
+      callbacks: {
+        label: (ctx: TooltipItem<'line'>) => ` ${ctx.parsed.y} k$`
       }
     }
-  };
+  },
+  scales: {
+    x: {
+      grid: {
+        color: `${neonColors.cyan}10`,
+        drawTicks: false
+      },
+      ticks: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          weight: 'bold',
+          size: 11
+        }
+      }
+    },
+    y: {
+      grid: {
+        color: `${neonColors.cyan}10`,
+        drawTicks: false
+      },
+      ticks: {
+        color: neonColors.cyan,
+        font: {
+          family: "'Roboto Mono', monospace",
+          weight: 'bold',
+          size: 11
+        },
+        callback: (tickValue: string | number) => `${tickValue} k$`
+      },
+      suggestedMin: 900
+    }
+  },
+  animation: {
+    duration: 800,
+    easing: 'easeOutQuart' as const
+  }
+};
 
   // Calcul des indicateurs
   const calculateKPIs = () => {
@@ -220,12 +312,13 @@ const BudgetForecast = () => {
     const actualTotal = budgetData.datasets[1].data.reduce((sum, val) => sum + val, 0);
     const variance = actualTotal - budgetTotal;
     const variancePercent = (variance / budgetTotal * 100).toFixed(1);
-    
+
+    const forecastDataPoints = forecastData.datasets[0].data;
     const forecastGrowth = (
-      (forecastData.datasets[0].data[3] - forecastData.datasets[0].data[0]) / 
-      forecastData.datasets[0].data[0] * 100
+      (forecastDataPoints[3] - forecastDataPoints[0]) /
+      forecastDataPoints[0] * 100
     ).toFixed(1);
-    
+
     return {
       budgetTotal: `${budgetTotal} k$`,
       actualTotal: `${actualTotal} k$`,
@@ -239,43 +332,43 @@ const BudgetForecast = () => {
   const kpis = calculateKPIs();
 
   const varianceDetails = [
-    { 
-      category: 'Marketing', 
-      budget: '65 k$', 
-      actual: '72 k$', 
-      variance: '+7 k$', 
+    {
+      category: 'Marketing',
+      budget: '65 k$',
+      actual: '72 k$',
+      variance: '+7 k$',
       percent: '+10.8%',
       color: 'text-pink-400'
     },
-    { 
-      category: 'R&D', 
-      budget: '85 k$', 
-      actual: '82 k$', 
-      variance: '-3 k$', 
+    {
+      category: 'R&D',
+      budget: '85 k$',
+      actual: '82 k$',
+      variance: '-3 k$',
       percent: '-3.5%',
       color: 'text-green-400'
     },
-    { 
-      category: 'Personnel', 
-      budget: '120 k$', 
-      actual: '125 k$', 
-      variance: '+5 k$', 
+    {
+      category: 'Personnel',
+      budget: '120 k$',
+      actual: '125 k$',
+      variance: '+5 k$',
       percent: '+4.2%',
       color: 'text-pink-400'
     },
-    { 
-      category: 'Infrastructure', 
-      budget: '45 k$', 
-      actual: '42 k$', 
-      variance: '-3 k$', 
+    {
+      category: 'Infrastructure',
+      budget: '45 k$',
+      actual: '42 k$',
+      variance: '-3 k$',
       percent: '-6.7%',
       color: 'text-green-400'
     },
-    { 
-      category: 'Autres', 
-      budget: '35 k$', 
-      actual: '38 k$', 
-      variance: '+3 k$', 
+    {
+      category: 'Autres',
+      budget: '35 k$',
+      actual: '38 k$',
+      variance: '+3 k$',
       percent: '+8.6%',
       color: 'text-pink-400'
     }
@@ -304,7 +397,7 @@ const BudgetForecast = () => {
             <span>Planification financière et analyse des écarts</span>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
           <div className="
             inline-flex items-center
@@ -337,7 +430,7 @@ const BudgetForecast = () => {
               ))}
             </select>
           </div>
-          
+
           <button className="
             p-2 rounded-lg
             bg-gradient-to-r from-cyan-500/20 to-blue-500/20
@@ -350,7 +443,7 @@ const BudgetForecast = () => {
             <FiRefreshCw className="mr-2" />
             Actualiser
           </button>
-          
+
           <button className="
             p-2 rounded-lg
             bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20
@@ -375,10 +468,9 @@ const BudgetForecast = () => {
             className={`
               px-6 py-3 font-medium relative
               transition-all
-              ${
-                activeTab === tab
-                  ? 'text-cyan-400 border-b-2 border-cyan-400'
-                  : 'text-cyan-400/60 hover:text-cyan-300'
+              ${activeTab === tab
+                ? 'text-cyan-400 border-b-2 border-cyan-400'
+                : 'text-cyan-400/60 hover:text-cyan-300'
               }
             `}
           >
@@ -402,7 +494,7 @@ const BudgetForecast = () => {
             Année {timePeriod}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-purple-900/30 to-fuchsia-900/30
@@ -417,7 +509,7 @@ const BudgetForecast = () => {
             Année {timePeriod}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-pink-900/30 to-rose-900/30
@@ -432,7 +524,7 @@ const BudgetForecast = () => {
             {kpis.isOverBudget ? 'Dépassement' : 'Sous-utilisation'}
           </div>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-yellow-900/30 to-amber-900/30
@@ -456,7 +548,7 @@ const BudgetForecast = () => {
               <Bar ref={barChartRef} data={budgetData} options={barChartOptions} />
             </div>
           </div>
-          
+
           <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
             <h3 className="text-lg font-bold text-purple-400 mb-4">Détail des écarts budgétaires</h3>
             <div className="overflow-x-auto">
@@ -494,7 +586,7 @@ const BudgetForecast = () => {
               <Line ref={lineChartRef} data={forecastData} options={lineChartOptions} />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
               <h3 className="text-lg font-bold text-cyan-400 mb-4">Hypothèses de prévision</h3>
@@ -510,14 +602,14 @@ const BudgetForecast = () => {
                   <div className="w-2 h-2 rounded-full bg-cyan-400 mt-2 mr-3"></div>
                   <div>
                     <div className="font-medium text-cyan-300">Contrôle des coûts</div>
-                    <div className="text-sm text-cyan-400/80">Réduction des dépenses d'exploitation de 3% par an</div>
+                    <div className="text-sm text-cyan-400/80">{"Réduction des dépenses d'exploitation de 3% par an"}</div>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-2 h-2 rounded-full bg-cyan-400 mt-2 mr-3"></div>
                   <div>
                     <div className="font-medium text-cyan-300">Inflation</div>
-                    <div className="text-sm text-cyan-400/80">Taux d'inflation estimé à 2.5% par an</div>
+                    <div className="text-sm text-cyan-400/80">{"Taux d'inflation estimé à 2.5% par an"}</div>
                   </div>
                 </li>
                 <li className="flex items-start">
@@ -529,7 +621,7 @@ const BudgetForecast = () => {
                 </li>
               </ul>
             </div>
-            
+
             <div className="bg-gray-800/40 rounded-xl border border-yellow-500/30 p-6">
               <h3 className="text-lg font-bold text-yellow-400 mb-4">Scénarios de prévision</h3>
               <div className="space-y-4">
@@ -583,7 +675,7 @@ const BudgetForecast = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
               <h3 className="text-lg font-bold text-purple-400 mb-4">Tendances budgétaires</h3>
               <div className="space-y-4">
@@ -617,7 +709,7 @@ const BudgetForecast = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-800/40 rounded-xl border border-yellow-500/30 p-6">
             <h3 className="text-lg font-bold text-yellow-400 mb-4">Analyse comparative sectorielle</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -633,7 +725,7 @@ const BudgetForecast = () => {
               </div>
               <div className="p-4 bg-gray-700/30 rounded-lg border border-green-500/30">
                 <div className="text-green-400/80 mb-2">Recommandation</div>
-                <div className="text-green-300">Maintenir ce niveau d'investissement</div>
+                <div className="text-green-300">{"Maintenir ce niveau d'investissement"}</div>
               </div>
             </div>
           </div>
@@ -643,7 +735,7 @@ const BudgetForecast = () => {
       {activeTab === 'optimisation' && (
         <div className="space-y-6">
           <div className="bg-gray-800/40 rounded-xl border border-green-500/30 p-6">
-            <h3 className="text-lg font-bold text-green-400 mb-4">Opportunités d'optimisation</h3>
+            <h3 className="text-lg font-bold text-green-400 mb-4">{"Opportunités d'optimisation"}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-gray-700/30 rounded-lg border border-cyan-500/30">
                 <div className="text-cyan-400/80 mb-2">Marketing digital</div>
@@ -671,7 +763,7 @@ const BudgetForecast = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-800/40 rounded-xl border border-pink-500/30 p-6">
               <h3 className="text-lg font-bold text-pink-400 mb-4">Risques budgétaires</h3>
@@ -705,16 +797,16 @@ const BudgetForecast = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
-              <h3 className="text-lg font-bold text-cyan-400 mb-4">Plan d'action</h3>
+              <h3 className="text-lg font-bold text-cyan-400 mb-4">{"Plan d'action"}</h3>
               <div className="space-y-4">
                 <div className="flex items-start">
                   <div className="w-3 h-3 rounded-full bg-cyan-400 mt-2 mr-3"></div>
                   <div>
                     <div className="font-medium text-cyan-300">Révision trimestrielle</div>
                     <div className="text-sm text-cyan-400/80">
-                      Mise en place d'un comité de révision budgétaire
+                      {"Mise en place d'un comité de révision budgétaire"}
                     </div>
                   </div>
                 </div>
@@ -723,7 +815,7 @@ const BudgetForecast = () => {
                   <div>
                     <div className="font-medium text-green-300">Optimisation fournisseurs</div>
                     <div className="text-sm text-green-400/80">
-                      Renégociation des contrats majeurs d'ici Q1
+                      {"Renégociation des contrats majeurs d'ici Q1"}
                     </div>
                   </div>
                 </div>
@@ -741,7 +833,7 @@ const BudgetForecast = () => {
                   <div>
                     <div className="font-medium text-purple-300">Outils de suivi</div>
                     <div className="text-sm text-purple-400/80">
-                      Implémentation d'un nouveau logiciel de budget
+                      {"Implémentation d'un nouveau logiciel de budget"}
                     </div>
                   </div>
                 </div>

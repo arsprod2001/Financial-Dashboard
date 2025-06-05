@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  TooltipItem
 } from 'chart.js';
 import { 
   FiFilter, FiTrendingUp, FiDollarSign, FiRefreshCw, 
@@ -26,10 +27,45 @@ ChartJS.register(
   ArcElement
 );
 
+// Définition des types
+type FilterKey = 'produit' | 'service' | 'région' | 'méthode de paiement' | 'catégorie';
+type TimeRangeKey = 'mois' | 'trimestre' | 'année';
+
+interface ChartSegment {
+  labels: string[];
+  data: number[];
+  color: string;
+  growth: number;
+  actions: {
+    icon: JSX.Element;
+    label: string;
+    color: string;
+  }[];
+}
+
+interface TimeRangeData {
+  total: number;
+  change: number;
+}
+
+interface ChartDataConfig {
+  produit: ChartSegment;
+  service: ChartSegment;
+  région: ChartSegment;
+  'méthode de paiement': ChartSegment;
+  catégorie: ChartSegment;
+}
+
+interface TimeRangeDataMap {
+  mois: TimeRangeData;
+  trimestre: TimeRangeData;
+  année: TimeRangeData;
+}
+
 const RevenueChannels = () => {
-  const [filter, setFilter] = useState('produit');
-  const [timeRange, setTimeRange] = useState('mois');
-  const [selectedSegment, setSelectedSegment] = useState(null);
+  const [filter, setFilter] = useState<FilterKey>('produit');
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>('mois');
+  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
   const [showActionPanel, setShowActionPanel] = useState(false);
   
   const neonColors = {
@@ -40,7 +76,7 @@ const RevenueChannels = () => {
     green: '#39ff14'
   };
 
-  const chartDataConfig = {
+  const chartDataConfig: ChartDataConfig = {
     produit: {
       labels: ['Produit A', 'Produit B', 'Produit C', 'Produit D', 'Produit E'],
       data: [120, 150, 180, 200, 170],
@@ -98,7 +134,7 @@ const RevenueChannels = () => {
     }
   };
 
-  const timeRangeData = {
+  const timeRangeData: TimeRangeDataMap = {
     mois: { total: 1250, change: 8.2 },
     trimestre: { total: 3850, change: 12.5 },
     année: { total: 15200, change: 15.3 }
@@ -126,17 +162,17 @@ const RevenueChannels = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top' as const,
         labels: {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 12
           },
           padding: 20,
           usePointStyle: true,
-          pointStyle: 'circle'
+          pointStyle: 'circle' as const
         }
       },
       title: {
@@ -146,7 +182,7 @@ const RevenueChannels = () => {
         font: {
           family: "'Orbitron', sans-serif",
           size: 18,
-          weight: 'bold'
+          weight: 'bold' as const
         },
         padding: {
           top: 10,
@@ -164,7 +200,11 @@ const RevenueChannels = () => {
         displayColors: true,
         usePointStyle: true,
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y || ctx.raw} k€ (${Math.round((ctx.parsed.y || ctx.raw) / timeRangeData[timeRange].total * 100)}%)`
+          label: (ctx: TooltipItem<'bar' | 'pie'>) => {
+            const value = ctx.parsed.y || ctx.raw as number;
+            const percentage = Math.round((value / timeRangeData[timeRange].total) * 100);
+            return ` ${value} k€ (${percentage}%)`;
+          }
         }
       }
     },
@@ -178,7 +218,7 @@ const RevenueChannels = () => {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 11
           }
         }
@@ -192,16 +232,16 @@ const RevenueChannels = () => {
           color: neonColors.cyan,
           font: {
             family: "'Roboto Mono', monospace",
-            weight: 'bold',
+            weight: 'bold' as const,
             size: 11
           },
-          callback: (value) => `${value} k€`
+          callback: (value: string | number) => `${value} k€`
         }
       }
     },
     animation: {
       duration: 1000,
-      easing: 'easeOutQuart'
+      easing: 'easeOutQuart' as const
     }
   };
 
@@ -209,13 +249,13 @@ const RevenueChannels = () => {
   const revenueChange = timeRangeData[timeRange].change;
   const categoryGrowth = chartDataConfig[filter].growth;
 
-  const handleSegmentClick = (segmentIndex) => {
+  const handleSegmentClick = (segmentIndex: number) => {
     setSelectedSegment(segmentIndex);
     setShowActionPanel(true);
   };
 
-  const executeAction = (action) => {
-    console.log(`Action exécutée: ${action.label} sur ${chartDataConfig[filter].labels[selectedSegment]}`);
+  const executeAction = (action: { label: string }) => {
+    console.log(`Action exécutée: ${action.label} sur ${chartDataConfig[filter].labels[selectedSegment as number]}`);
     setShowActionPanel(false);
   };
 
@@ -325,7 +365,7 @@ const RevenueChannels = () => {
           <FiFilter className="ml-3 text-cyan-400" />
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={(e) => setFilter(e.target.value as FilterKey)}
             className="
               bg-transparent
               text-cyan-400
@@ -336,7 +376,7 @@ const RevenueChannels = () => {
               appearance-none
             "
           >
-            {Object.keys(chartDataConfig).map(option => (
+            {(Object.keys(chartDataConfig) as FilterKey[]).map(option => (
               <option 
                 key={option} 
                 value={option}
@@ -349,7 +389,7 @@ const RevenueChannels = () => {
         </div>
         
         <div className="flex space-x-1">
-          {['mois', 'trimestre', 'année'].map((range) => (
+          {(['mois', 'trimestre', 'année'] as TimeRangeKey[]).map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}

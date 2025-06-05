@@ -1,42 +1,91 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { FiX, FiMail, FiPhone, FiMapPin, FiCreditCard, FiCalendar, FiTrendingUp, FiEdit, FiTrash2, FiSend, FiStar, FiUser } from 'react-icons/fi';
 
-const ClientDetailsModal = ({ client, onClose }) => {
+// Définition des interfaces
+interface Transaction {
+  id: number;
+  date: string;
+  amount: string;
+  status: string;
+  method: string;
+}
+
+interface Interaction {
+  id: number;
+  type: string;
+  date: string;
+  description: string;
+  agent: string;
+}
+
+interface Document {
+  id: number;
+  name: string;
+  type: string;
+  date: string;
+  size: string;
+}
+
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  status: string;
+  paymentMethod: string;
+  totalSpent: string;
+  transactions: number;
+  lastTransaction: string;
+  loyaltyLevel: number;
+  notes: string;
+  transactionHistory: Transaction[];
+  interactionHistory: Interaction[];
+  documents: Document[];
+}
+
+interface ClientDetailsModalProps {
+  client: Partial<Client>;
+  onClose: () => void;
+}
+
+const ClientDetailsModal = ({ client, onClose }: ClientDetailsModalProps) => {
   const [activeTab, setActiveTab] = useState('details');
   const [isEditing, setIsEditing] = useState(false);
   
-  // Fusionne les données client avec les valeurs par défaut
-  const [clientData, setClientData] = useState(() => ({
-    // Valeurs par défaut essentielles
+  const [clientData, setClientData] = useState<Client>({
+    id: 1,
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    status: "",
+    paymentMethod: "",
+    totalSpent: "",
+    transactions: 0,
+    lastTransaction: "",
+    loyaltyLevel: 0,
+    notes: "",
     transactionHistory: [],
     interactionHistory: [],
     documents: [],
-    // Surcharge avec les valeurs par défaut complètes
-    ...ClientDetailsModal.defaultProps.client,
-    // Surcharge avec le prop client
     ...client
-  }));
+  } as Client);
 
-  // Synchronise avec les changements du prop client
   useEffect(() => {
     setClientData(prev => ({
-      // Valeurs par défaut
-      ...ClientDetailsModal.defaultProps.client,
-      // Conserve les modifications locales
       ...prev,
-      // Nouvelles données du prop
       ...client
-    }));
+    } as Client));
   }, [client]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setClientData(prev => ({ ...prev, [name]: value }));
+    setClientData(prev => ({ ...prev, [name]: value } as Client));
   };
 
   const handleSave = () => {
     setIsEditing(false);
-    // Ici, vous enverriez normalement les données mises à jour à votre API
     console.log("Données client mises à jour:", clientData);
   };
 
@@ -50,7 +99,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
         overflow-hidden
         max-h-[90vh] overflow-y-auto
       ">
-        {/* En-tête de la modal */}
         <div className="p-6 border-b border-cyan-500/30 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-cyan-400 flex items-center">
@@ -80,7 +128,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
           </button>
         </div>
         
-        {/* Navigation par onglets */}
         <div className="border-b border-cyan-500/20">
           <div className="flex">
             {['details', 'transactions', 'historique', 'documents'].map(tab => (
@@ -99,12 +146,9 @@ const ClientDetailsModal = ({ client, onClose }) => {
           </div>
         </div>
         
-        {/* Corps de la modal */}
         <div className="p-6">
-          {/* Onglet Détails */}
           {activeTab === 'details' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Informations de contact */}
               <div className="bg-gray-800/40 p-6 rounded-xl border border-cyan-500/20">
                 <h3 className="text-lg font-semibold text-cyan-300 mb-4 flex items-center">
                   <FiUser className="mr-2" />
@@ -176,7 +220,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
                 </div>
               </div>
               
-              {/* Statistiques et statut */}
               <div className="space-y-6">
                 <div className="bg-gray-800/40 p-6 rounded-xl border border-cyan-500/20">
                   <h3 className="text-lg font-semibold text-cyan-300 mb-4 flex items-center">
@@ -242,7 +285,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
             </div>
           )}
           
-          {/* Onglet Transactions */}
           {activeTab === 'transactions' && (
             <div className="bg-gray-800/40 rounded-xl border border-cyan-500/20 overflow-hidden">
               <div className="grid grid-cols-5 gap-4 p-4 font-medium text-cyan-400 border-b border-cyan-500/20">
@@ -281,7 +323,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
             </div>
           )}
           
-          {/* Onglet Historique */}
           {activeTab === 'historique' && (
             <div className="space-y-4">
               {clientData.interactionHistory.map((interaction, index) => (
@@ -304,7 +345,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
             </div>
           )}
           
-          {/* Onglet Documents */}
           {activeTab === 'documents' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {clientData.documents.map((doc, index) => (
@@ -328,7 +368,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
           )}
         </div>
         
-        {/* Pied de page */}
         <div className="p-6 border-t border-cyan-500/30 flex justify-between items-center">
           <div className="flex space-x-3">
             <button className="px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all flex items-center">
@@ -362,7 +401,6 @@ const ClientDetailsModal = ({ client, onClose }) => {
           </div>
         </div>
         
-        {/* Effet de lueur */}
         <div className="
           absolute inset-0 rounded-xl 
           bg-gradient-to-br from-cyan-500/10 to-blue-500/10 
@@ -375,7 +413,7 @@ const ClientDetailsModal = ({ client, onClose }) => {
   );
 };
 
-// Données client de démonstration
+// Valeurs par défaut pour les props
 ClientDetailsModal.defaultProps = {
   client: {
     id: 1,

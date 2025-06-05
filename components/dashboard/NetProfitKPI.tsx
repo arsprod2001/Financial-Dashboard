@@ -16,7 +16,7 @@ const NetProfitKPI = ({ netProfit = 6500, comparison = 8 }) => {
         w-full max-w-xs
         neon-glow-purple
       "
-      tabIndex="0"
+      tabIndex={0}
     >
       <div className="absolute top-0 inset-x-0 h-1 rounded-t-xl bg-gradient-to-r from-purple-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 

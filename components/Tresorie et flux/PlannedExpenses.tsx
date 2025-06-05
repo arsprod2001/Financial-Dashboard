@@ -5,6 +5,8 @@ import {
   ArcElement,
   Tooltip,
   Legend,
+  ChartData,
+  ChartOptions
 } from 'chart.js';
 import { FiChevronDown, FiFilter, FiRefreshCw, FiDownload, FiAlertCircle } from 'react-icons/fi';
 
@@ -29,7 +31,7 @@ const PlannedExpenses = () => {
   };
 
   // Données pour les dépenses planifiées
-  const expenses = [
+   const expenses = [
     {
       id: 1,
       category: 'Salaires',
@@ -77,15 +79,24 @@ const PlannedExpenses = () => {
     }
   ];
 
+  // Fonction pour parser les montants
+   const parseAmount = (amount: string): number => {
+    return parseFloat(amount.replace(/\s/g, '').replace(',', '.').replace('€', ''));
+  };
+
+
+  // Calcul du total des dépenses
+  const totalExpenses = expenses.reduce((sum, expense) => {
+    return sum + parseAmount(expense.amount);
+  }, 0);
+
   // Données pour le graphique en camembert
-  const chartData = {
+  const chartData: ChartData<'pie'> = {
     labels: expenses.map((expense) => expense.category),
     datasets: [
       {
         label: 'Dépenses planifiées (€)',
-        data: expenses.map((expense) => 
-          parseFloat(expense.amount.replace(' ', '').replace(',', '.').replace('€', ''))
-        ),
+        data: expenses.map(expense => parseAmount(expense.amount)),
         backgroundColor: expenses.map(expense => `${expense.color}80`),
         borderColor: expenses.map(expense => expense.color),
         borderWidth: 2,
@@ -93,8 +104,9 @@ const PlannedExpenses = () => {
     ],
   };
 
+
   // Options pour le graphique en camembert avec style néon
-  const chartOptions = {
+  const chartOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -123,9 +135,10 @@ const PlannedExpenses = () => {
           label: (context) => {
             const label = context.label || '';
             const value = context.parsed || 0;
-            const total = context.chart.getDatasetMeta(0).total;
+            // Calculer le total à partir des données
+            const total = (context.chart.data.datasets[context.datasetIndex]?.data as number[])?.reduce((a, b) => a + b, 0) || 0;
             const percentage = Math.round((value / total) * 100);
-            return `${label}: ${value} € (${percentage}%)`;
+            return `${label}: ${value.toLocaleString('fr-FR')} € (${percentage}%)`;
           }
         }
       }
@@ -136,11 +149,6 @@ const PlannedExpenses = () => {
       duration: 1000
     }
   };
-
-  // Calcul du total des dépenses
-  const totalExpenses = expenses.reduce((sum, expense) => {
-    return sum + parseFloat(expense.amount.replace(' ', '').replace(',', '.').replace('€', ''));
-  }, 0);
 
   return (
     <div className="
@@ -361,7 +369,7 @@ const PlannedExpenses = () => {
             <div className="p-3 bg-cyan-500/10 rounded-lg border border-cyan-500/30 flex items-start">
               <div className="flex-1">
                 <div className="font-medium text-cyan-300">Optimisation possible</div>
-                <div className="text-sm text-cyan-400/80">15% d'économies potentielles sur les abonnements</div>
+                <div className="text-sm text-cyan-400/80">{"15% d'économies potentielles sur les abonnements"}</div>
               </div>
               <div className="text-2xl font-bold text-cyan-400">↑</div>
             </div>
@@ -411,7 +419,7 @@ const PlannedExpenses = () => {
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
             <div className="text-cyan-400/80 mb-2">Moyenne du secteur</div>
             <div className="text-xl font-bold text-cyan-300">42 500 €</div>
-            <div className="text-sm text-cyan-400/60 mt-1">pour votre taille d'entreprise</div>
+            <div className="text-sm text-cyan-400/60 mt-1">{"pour votre taille d'entreprise"}</div>
           </div>
           
           <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
