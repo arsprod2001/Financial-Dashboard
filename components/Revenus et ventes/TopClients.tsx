@@ -1,3 +1,4 @@
+{/** 
 import React, { useState } from 'react';
 import { FiTrendingUp, FiStar, FiMail, FiUser } from 'react-icons/fi';
 import ContactClientModal from "@/components/ContactClientModal";
@@ -181,7 +182,6 @@ const TopClients = () => {
         </div>
       </div>
 
-      {/* En-tête du tableau amélioré */}
       <div className="grid grid-cols-12 gap-4 mb-4 font-medium text-cyan-400/80 neon-text-muted">
         <div className="col-span-1">RANG</div>
         <div className="col-span-3">CLIENT</div>
@@ -191,7 +191,6 @@ const TopClients = () => {
         <div className="col-span-2">ACTIONS</div>
       </div>
 
-      {/* Liste des clients améliorée */}
       <div className="space-y-3">
         {clients.map((client, index) => {
           // Convertir la valeur pour la barre de progression
@@ -216,7 +215,6 @@ const TopClients = () => {
                 group
               "
             >
-              {/* Colonne Rang */}
               <div className="col-span-1">
                 <div className={`
                   w-8 h-8 flex items-center justify-center
@@ -234,7 +232,6 @@ const TopClients = () => {
                 </div>
               </div>
 
-              {/* Colonne Client améliorée */}
               <div className="col-span-3 flex items-center">
                 <div className="
                   w-10 h-10 rounded-full
@@ -262,7 +259,6 @@ const TopClients = () => {
                 </div>
               </div>
 
-              {/* Colonne Revenu avec barre de progression */}
               <div className="col-span-2">
                 <div className="text-cyan-400 font-bold">
                   {client.totalSpent}
@@ -275,7 +271,6 @@ const TopClients = () => {
                 </div>
               </div>
 
-              {/* Colonne Transactions */}
               <div className="col-span-2">
                 <div className="
                   inline-block px-3 py-1 text-sm
@@ -286,7 +281,6 @@ const TopClients = () => {
                 </div>
               </div>
 
-              {/* Colonne Tendance */}
               <div className="col-span-2">
                 <div className={`flex items-center ${client.growth >= 0 ? 'text-green-400' : 'text-red-400'
                   }`}>
@@ -298,7 +292,6 @@ const TopClients = () => {
                 </div>
               </div>
 
-              {/* Boutons d'action */}
               <div className="col-span-2 flex justify-end space-x-2">
                 <button className="
                   p-2 rounded-md
@@ -325,7 +318,6 @@ const TopClients = () => {
                 </button>
               </div>
 
-              {/* Hover effect */}
               <div className="
                 absolute inset-0 rounded-lg 
                 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 
@@ -337,7 +329,6 @@ const TopClients = () => {
         })}
       </div>
 
-      {/* Pied de tableau */}
       <div className="mt-6 flex justify-between items-center">
         <div className="text-cyan-400/60 text-sm">
           Affichage 1-{clients.length} de {clients.length} clients VIP
@@ -356,7 +347,6 @@ const TopClients = () => {
         </button>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 
@@ -390,3 +380,17 @@ const TopClients = () => {
 };
 
 export default TopClients;
+
+*/}
+
+import React from 'react'
+
+const TopClients = () => {
+  return (
+    <div>
+      
+    </div>
+  )
+}
+
+export default TopClients
