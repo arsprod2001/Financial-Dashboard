@@ -27,7 +27,6 @@ ChartJS.register(
   Filler
 );
 
-// Définition des types
 type TimePeriodKey = 'année' | 'trimestre' | 'mois';
 
 interface CostDataItem {
@@ -56,7 +55,6 @@ const CostAnalysis = () => {
   const pieChartRef = useRef<Chart<'pie', number[], string> | null>(null);
   const barChartRef = useRef<Chart<'bar', number[], string> | null>(null);
   
-  // Références pour les gradients
   const pieGradientRef = useRef<[CanvasGradient, CanvasGradient] | null>(null);
   const barGradientFixedRef = useRef<CanvasGradient | null>(null);
   const barGradientVariableRef = useRef<CanvasGradient | null>(null);
@@ -124,7 +122,6 @@ const CostAnalysis = () => {
     }
   }, [timePeriod]);
 
-  // Fonctions pour récupérer les gradients
   const getPieGradients = () => {
     return pieGradientRef.current || [neonColors.cyan, neonColors.purple];
   };
@@ -233,7 +230,6 @@ const CostAnalysis = () => {
   }
 };
 
-// For bar chart
 const barChartOptions: ChartOptions<'bar'> = {
   responsive: true,
   maintainAspectRatio: false,

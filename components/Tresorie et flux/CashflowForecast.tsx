@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 import { FiRefreshCw, FiDownload, FiChevronDown, FiTrendingUp } from 'react-icons/fi';
 
-// Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -42,7 +41,6 @@ const CashflowForecast = () => {
   };
   const [gradients, setGradients] = useState<GradientsType>({});
 
-  // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
     green: '#39ff14',
@@ -52,19 +50,16 @@ const CashflowForecast = () => {
     blue: '#00b4d8'
   };
 
-  // Fonction pour créer les gradients
   useEffect(() => {
     if (containerRef.current) {
       const canvas = containerRef.current.querySelector('canvas');
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          // Gradient pour les entrées
           const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
           incomeGradient.addColorStop(0, `${neonColors.green}60`);
           incomeGradient.addColorStop(1, `${neonColors.green}10`);
           
-          // Gradient pour les sorties
           const expensesGradient = ctx.createLinearGradient(0, 0, 0, 400);
           expensesGradient.addColorStop(0, `${neonColors.pink}60`);
           expensesGradient.addColorStop(1, `${neonColors.pink}10`);
@@ -78,7 +73,6 @@ const CashflowForecast = () => {
     }
   }, [period, activeScenario]);
 
-  // Données pour les prévisions
   const getChartData = (): ChartData<'line'> => {
     const baseData = {
       monthly: {
@@ -156,7 +150,6 @@ const CashflowForecast = () => {
       }
     };
 
-    // Appliquer les scénarios
     const scenarioModifiers = {
       optimiste: {
         income: 1.15,
@@ -176,14 +169,12 @@ const CashflowForecast = () => {
     const periodKey = period === 'mois' ? 'monthly' : period === 'trimestre' ? 'quarterly' : 'yearly';
     const data = JSON.parse(JSON.stringify(baseData[periodKey])) as ChartData<'line'>;
 
-    // Appliquer les modificateurs de scénario
     data.datasets[0].data = data.datasets[0].data.map(val => Math.round(Number(val) * modifier.income));
     data.datasets[1].data = data.datasets[1].data.map(val => Math.round(Number(val) * modifier.expenses));
 
     return data;
   };
 
-  // Options pour le graphique avec style néon
   const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -267,7 +258,6 @@ const CashflowForecast = () => {
     }
   };
 
-  // Calcul des indicateurs clés
   const calculateKPIs = () => {
     const data = getChartData();
     const incomeData = data.datasets[0].data as number[];
@@ -277,7 +267,6 @@ const CashflowForecast = () => {
     const lastExpenses = expensesData[expensesData.length - 1];
     const netCashflow = lastIncome - lastExpenses;
     
-    // Calcul de la croissance par rapport à la première période
     const growth = ((lastIncome - lastExpenses) - (incomeData[0] - expensesData[0])) / 
                    (incomeData[0] - expensesData[0]) * 100;
     
@@ -291,14 +280,12 @@ const CashflowForecast = () => {
 
   const kpis = calculateKPIs();
 
-  // Scénarios de prévision
   const scenarios = [
     { id: 'optimiste', title: 'Scénario Optimiste', color: 'green', description: 'Croissance forte, dépenses maîtrisées' },
     { id: 'realiste', title: 'Scénario Réaliste', color: 'cyan', description: 'Tendances actuelles maintenues' },
     { id: 'pessimiste', title: 'Scénario Pessimiste', color: 'pink', description: 'Ralentissement économique, coûts accrus' }
   ];
 
-  // Fonction pour obtenir les classes de couleur dynamiques
   const getScenarioClasses = (scenario: typeof scenarios[0]) => {
     const isActive = activeScenario === scenario.id;
     const color = scenario.color;
@@ -725,7 +712,6 @@ const CashflowForecast = () => {
         )}
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

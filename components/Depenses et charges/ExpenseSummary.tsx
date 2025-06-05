@@ -21,7 +21,6 @@ ChartJS.register(
   Legend
 );
 
-// Définir les types
 interface ExpenseDetail {
   id: number;
   category: string; 
@@ -472,7 +471,6 @@ const ExpenseSummary = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Graphique en camembert */}
         <div className="lg:col-span-2 bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
           <div className="h-96">
             <Pie data={expenseData} options={chartOptions} />

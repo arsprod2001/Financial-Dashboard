@@ -27,7 +27,6 @@ ChartJS.register(
   ArcElement
 );
 
-// Définition des types
 type FilterKey = 'produit' | 'service' | 'région' | 'méthode de paiement' | 'catégorie';
 type TimeRangeKey = 'mois' | 'trimestre' | 'année';
 

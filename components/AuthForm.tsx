@@ -85,7 +85,7 @@ export default function AuthForm({ type }: AuthFormProps) {
       }
 
       router.push('/dashboard')
-      router.refresh() // Refresh the router to update auth state
+      router.refresh() 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {

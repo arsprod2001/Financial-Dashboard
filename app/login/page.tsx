@@ -20,7 +20,7 @@ export default function AuthForm() {
   const validateForm = () => {
     setError('');
 
-    // Validation email
+    
     if (!email) {
       setError('Veuillez entrer votre email');
       return false;
@@ -31,7 +31,7 @@ export default function AuthForm() {
       return false;
     }
 
-    // Validation mot de passe
+    
     if (!password) {
       setError('Veuillez entrer votre mot de passe');
       return false;
@@ -79,7 +79,7 @@ export default function AuthForm() {
         throw new Error(errorData.error || 'Une erreur est survenue');
       }
 
-      // Redirection après connexion réussie
+      
       router.push('/dashboard');
     } catch (err: unknown) {
       if (err instanceof Error) {

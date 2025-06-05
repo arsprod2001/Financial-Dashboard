@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { FiUser, FiLock, FiBell, FiCreditCard, FiDatabase, FiGlobe, FiMail, FiTrash2, FiLogOut, FiChevronDown, FiCheck, FiAlertCircle } from 'react-icons/fi';
 
 const SettingsPage = () => {
-  // États pour les différents paramètres
   const [activeTab, setActiveTab] = useState('profile');
   const [notifications, setNotifications] = useState({
     email: true,
@@ -31,14 +30,12 @@ const SettingsPage = () => {
   type NotificationType = 'email' | 'push' | 'weeklyReport' | 'promotions';
   type SecurityType = 'twoFactor' | 'loginAlerts' | 'passwordChangeRequired';
 
-  // Fonction pour basculer les notifications
   const toggleNotification = (type: NotificationType) => {
     setNotifications((prev) => ({
       ...prev,
       [type]: !prev[type],
     }));
   };
-  // Fonction pour basculer la sécurité
   const toggleSecurity = (type: SecurityType) => {
     setSecurity((prev) => ({
       ...prev,
@@ -46,9 +43,8 @@ const SettingsPage = () => {
     }));
   };
 
-  type PlanType = 'pro' | 'premium' | 'enterprise'; // selon tes plans réels
+  type PlanType = 'pro' | 'premium' | 'enterprise'; 
 
-  // Fonction pour changer le plan
   const changePlan = (plan: PlanType) => {
     setBilling((prev) => ({
       ...prev,
@@ -56,15 +52,12 @@ const SettingsPage = () => {
     }));
   };
 
-  // Fonction pour confirmer la suppression du compte
   const confirmAccountDeletion = () => {
     setDeleteConfirm(true);
     setTimeout(() => setDeleteConfirm(false), 5000);
   };
 
-  // Fonction pour supprimer le compte
   const deleteAccount = () => {
-    // Logique de suppression du compte
     alert('Votre compte a été supprimé avec succès');
     setDeleteConfirm(false);
   };
@@ -124,9 +117,8 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          {/* Contenu principal */}
+          {/* Section Profil */}
           <div className="md:w-3/4">
-            {/* Section Profil */}
             {activeTab === 'profile' && (
               <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
                 <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">

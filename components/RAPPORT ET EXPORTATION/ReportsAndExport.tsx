@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FiDownload, FiFileText, FiFilter, FiRefreshCw, FiSearch, FiPrinter, FiMail, FiBarChart2, FiPieChart, FiTrendingUp } from 'react-icons/fi';
 
-// Définition des types
 interface ReportType {
   id: string;
   name: string;

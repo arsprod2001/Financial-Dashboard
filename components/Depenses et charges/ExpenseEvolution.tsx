@@ -27,7 +27,6 @@ ChartJS.register(
   Filler
 );
 
-// Définir les types
 type PeriodKey = 'jour' | 'semaine' | 'mois' | 'trimestre';
 
 interface ChartDataItem {
@@ -365,7 +364,6 @@ const [gradient, setGradient] = useState<CanvasGradient | null>(null);
         </div>
       </div>
 
-      {/* Graphique principal */}
       <div className="mb-6 bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
         <div className="h-96">
           <Line 
@@ -380,7 +378,6 @@ const [gradient, setGradient] = useState<CanvasGradient | null>(null);
         </div>
       </div>
 
-      {/* Analyse comparative */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
           <h3 className="text-lg font-bold text-purple-400 mb-4">{"Comparaison avec l'année précédente"}</h3>

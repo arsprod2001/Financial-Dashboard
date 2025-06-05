@@ -1,7 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { FiX, FiMail, FiPhone, FiCalendar, FiPaperclip, FiSend, FiUser, FiMessageSquare } from 'react-icons/fi';
 
-// Définition des interfaces
 interface ClientContactInfo {
   id?: number;
   name?: string;

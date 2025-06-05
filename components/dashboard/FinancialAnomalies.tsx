@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Définir les types pour les paramètres
 type AnomalyType = 'débit' | 'crédit' | 'solde' | 'frais';
 type SeverityLevel = 'high' | 'medium' | 'low';
 

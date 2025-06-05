@@ -17,7 +17,6 @@ import {
 } from 'chart.js';
 import { FiChevronDown, FiChevronUp, FiRefreshCw, FiDownload, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
 
-// Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -29,7 +28,6 @@ ChartJS.register(
   Filler
 );
 
-// Définition des types
 interface Account {
   id: number;
   name: string;
@@ -52,7 +50,6 @@ const BankBalanceOverview = () => {
   const chartRef = useRef<Chart<'line'> | null>(null);
   const [lineGradient, setLineGradient] = useState<CanvasGradient | null>(null);
 
-  // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
     purple: '#bc00ff',
@@ -61,7 +58,6 @@ const BankBalanceOverview = () => {
     yellow: '#ffd700'
   };
 
-  // Données pour les soldes des comptes bancaires
   const accounts: Account[] = [
     {
       id: 1,
@@ -101,7 +97,6 @@ const BankBalanceOverview = () => {
     }
   ];
 
-  // Données pour l'évolution des liquidités avec variations
   const liquidityData = {
     labels: timePeriod === 'mois' 
       ? ['1', '5', '10', '15', '20', '25', '30'] 
@@ -154,7 +149,6 @@ const BankBalanceOverview = () => {
     ],
   };
 
-  // Création du gradient pour le graphique
   useEffect(() => {
     if (chartRef.current) {
       const ctx = chartRef.current.ctx;
@@ -165,7 +159,6 @@ const BankBalanceOverview = () => {
     }
   }, [timePeriod]);
 
-  // Options pour le graphique en ligne avec style néon
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -249,7 +242,6 @@ const BankBalanceOverview = () => {
     }
   };
 
-  // Calcul du solde total
   const totalBalance = accounts.reduce((sum, account) => {
     const balanceValue = parseFloat(
       account.balance
@@ -345,7 +337,6 @@ const BankBalanceOverview = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="
           p-4 rounded-xl
@@ -408,9 +399,7 @@ const BankBalanceOverview = () => {
         </div>
       </div>
 
-      {/* Graphique et comptes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Graphique en ligne */}
         <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
           <div className="h-96">
             <Line ref={chartRef} data={liquidityData} options={chartOptions} />
@@ -470,7 +459,6 @@ const BankBalanceOverview = () => {
 
       {/* Projections et alertes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Projections */}
         <div className="bg-gray-800/40 rounded-xl border border-green-500/30 p-6">
           <h3 className="text-lg font-bold text-green-400 mb-4">Projections de trésorerie</h3>
           <div className="space-y-4">
@@ -546,7 +534,6 @@ const BankBalanceOverview = () => {
         </div>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

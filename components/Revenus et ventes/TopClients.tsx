@@ -4,7 +4,6 @@ import ContactClientModal from "@/components/ContactClientModal";
 import ClientDetailsModal from "@/components/ClientDetailsModal";
 import ClientsListModal from "@/components/ClientsListModal";
 
-// Définition du type Client pour TypeScript
 type Client = {
   id: number;
   name: string;
@@ -26,16 +25,15 @@ const TopClients = () => {
   const [showClientsModal, setShowClientsModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
-  // Données clients unifiées avec toutes les propriétés nécessaires
   const clientsData: Client[] = [
     {
       id: 1,
-      name: 'Marie Dupont',
-      email: "marie.dupont@example.com",
-      phone: "+33 6 12 34 56 78",
+      name: 'Amadou Sow',
+      email: "amadou.sow@example.com",
+      phone: "+1 437 4838 9304",
       status: "VIP",
       paymentMethod: "Carte de crédit",
-      totalSpent: "25 000,00 €",
+      totalSpent: "$25 000,00",
       transactions: 45,
       lastTransaction: "2023-10-15",
       growth: 12.5,
@@ -46,9 +44,9 @@ const TopClients = () => {
       id: 2,
       name: 'Jean Martin',
       email: "jean.martin@example.com",
-      phone: "+33 6 23 45 67 89",
+      phone: "+1 623 4567 889",
       status: "Actif",
-      paymentMethod: "PayPal",
+      paymentMethod: "CIBC",
       totalSpent: "22 500,00 €",
       transactions: 38,
       lastTransaction: "2023-10-18",
@@ -60,7 +58,7 @@ const TopClients = () => {
       id: 3,
       name: 'Sophie Leroy',
       email: "sophie.leroy@example.com",
-      phone: "+33 6 34 56 78 90",
+      phone: "+222 47287786",
       status: "VIP",
       paymentMethod: "Virement bancaire",
       totalSpent: "20 000,00 €",
@@ -88,7 +86,7 @@ const TopClients = () => {
       id: 5,
       name: 'Émilie Petit',
       email: "emilie.petit@example.com",
-      phone: "+33 6 56 78 90 12",
+      phone: "+1 877 7908 789",
       status: "Actif",
       paymentMethod: "Espèces",
       totalSpent: "16 000,00 €",
@@ -100,13 +98,12 @@ const TopClients = () => {
     },
   ];
 
-  // Correction de l'erreur de parsing
   const maxSpent = Math.max(...clientsData.map(client => {
     return parseFloat(
       client.totalSpent
-        .replace(/\s/g, '')   // Supprimer tous les espaces
-        .replace('€', '')     // Supprimer le symbole euro
-        .replace(',', '.')    // Remplacer la virgule par un point
+        .replace(/\s/g, '')  
+        .replace('€', '')     
+        .replace(',', '.')    
     );
   }));
 
@@ -162,7 +159,6 @@ const TopClients = () => {
 
       <div className="space-y-3">
         {clientsData.map((client, index) => {
-          // Convertir la valeur pour la barre de progression
           const numericValue = parseFloat(
             client.totalSpent
               .replace(/\s/g, '')

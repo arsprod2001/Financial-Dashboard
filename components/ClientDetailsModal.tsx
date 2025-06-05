@@ -1,7 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { FiX, FiMail, FiPhone, FiMapPin, FiCreditCard, FiCalendar, FiTrendingUp, FiEdit, FiTrash2, FiSend, FiStar, FiUser } from 'react-icons/fi';
 
-// Définition des interfaces
 interface Transaction {
   id: number;
   date: string;
@@ -413,7 +412,6 @@ const ClientDetailsModal = ({ client, onClose }: ClientDetailsModalProps) => {
   );
 };
 
-// Valeurs par défaut pour les props
 ClientDetailsModal.defaultProps = {
   client: {
     id: 1,

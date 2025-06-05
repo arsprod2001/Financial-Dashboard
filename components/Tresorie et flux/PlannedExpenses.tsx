@@ -10,7 +10,6 @@ import {
 } from 'chart.js';
 import { FiChevronDown, FiFilter, FiRefreshCw, FiDownload, FiAlertCircle } from 'react-icons/fi';
 
-// Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -21,7 +20,6 @@ const PlannedExpenses = () => {
   const [timeFrame, setTimeFrame] = useState('trimestre');
   const [showDetails, setShowDetails] = useState(false);
   
-  // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
     purple: '#bc00ff',
@@ -30,7 +28,6 @@ const PlannedExpenses = () => {
     green: '#39ff14'
   };
 
-  // Données pour les dépenses planifiées
    const expenses = [
     {
       id: 1,
@@ -79,18 +76,15 @@ const PlannedExpenses = () => {
     }
   ];
 
-  // Fonction pour parser les montants
    const parseAmount = (amount: string): number => {
     return parseFloat(amount.replace(/\s/g, '').replace(',', '.').replace('€', ''));
   };
 
 
-  // Calcul du total des dépenses
   const totalExpenses = expenses.reduce((sum, expense) => {
     return sum + parseAmount(expense.amount);
   }, 0);
 
-  // Données pour le graphique en camembert
   const chartData: ChartData<'pie'> = {
     labels: expenses.map((expense) => expense.category),
     datasets: [
@@ -105,7 +99,6 @@ const PlannedExpenses = () => {
   };
 
 
-  // Options pour le graphique en camembert avec style néon
   const chartOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -135,7 +128,6 @@ const PlannedExpenses = () => {
           label: (context) => {
             const label = context.label || '';
             const value = context.parsed || 0;
-            // Calculer le total à partir des données
             const total = (context.chart.data.datasets[context.datasetIndex]?.data as number[])?.reduce((a, b) => a + b, 0) || 0;
             const percentage = Math.round((value / total) * 100);
             return `${label}: ${value.toLocaleString('fr-FR')} € (${percentage}%)`;
@@ -235,7 +227,6 @@ const PlannedExpenses = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="
           p-4 rounded-xl
@@ -283,16 +274,13 @@ const PlannedExpenses = () => {
         </div>
       </div>
 
-      {/* Graphique et détails */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Graphique en camembert */}
         <div className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6">
           <div className="h-96">
             <Pie data={chartData} options={chartOptions} />
           </div>
         </div>
         
-        {/* Détails des dépenses */}
         <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold text-purple-400">Détails par catégorie</h3>
@@ -446,7 +434,6 @@ const PlannedExpenses = () => {
         </div>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 import { FiFilter, FiRefreshCw, FiDownload, FiChevronDown } from 'react-icons/fi';
 
-// Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -38,7 +37,6 @@ const StackedAreaChart = () => {
   };
   const [gradients, setGradients] = useState<GradientsType>({});
 
-  // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
     green: '#39ff14',
@@ -49,19 +47,16 @@ const StackedAreaChart = () => {
 
   
 
-  // Fonction pour créer les gradients
   useEffect(() => {
     if (containerRef.current) {
       const canvas = containerRef.current.querySelector('canvas');
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          // Gradient pour les entrées
           const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
           incomeGradient.addColorStop(0, `${neonColors.green}60`);
           incomeGradient.addColorStop(1, `${neonColors.green}10`);
 
-          // Gradient pour les sorties
           const expensesGradient = ctx.createLinearGradient(0, 0, 0, 400);
           expensesGradient.addColorStop(0, `${neonColors.pink}60`);
           expensesGradient.addColorStop(1, `${neonColors.pink}10`);
@@ -75,7 +70,6 @@ const StackedAreaChart = () => {
     }
   }, [period]);
 
-  // Données pour les entrées et sorties
   const monthlyData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
@@ -152,7 +146,6 @@ const StackedAreaChart = () => {
     ],
   };
 
-  // Fonction pour sélectionner les données
   const getChartData = (): ChartData<'line'> => {
     switch (period) {
       case 'mois': return monthlyData;
@@ -162,7 +155,6 @@ const StackedAreaChart = () => {
     }
   };
 
-  // Options pour le graphique en aires empilées avec style néon
   const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -246,7 +238,6 @@ const StackedAreaChart = () => {
     }
   };
 
-  // Calcul des indicateurs
   const calculateKPIs = () => {
     const data = getChartData();
     const incomeData = data.datasets[0].data as number[];
@@ -361,7 +352,6 @@ const StackedAreaChart = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="
           p-4 rounded-xl
@@ -426,7 +416,6 @@ const StackedAreaChart = () => {
         </div>
       </div>
 
-      {/* Graphique en aires empilées */}
       <div
         className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6"
         ref={containerRef}
@@ -436,7 +425,6 @@ const StackedAreaChart = () => {
         </div>
       </div>
 
-      {/* Analyse détaillée */}
       <div className="bg-gray-800/40 rounded-xl border border-purple-500/30 p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-purple-400">Analyse détaillée</h3>
@@ -450,7 +438,6 @@ const StackedAreaChart = () => {
 
         {showDetails && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Détails des entrées */}
             <div className="bg-gray-700/30 rounded-lg border border-green-500/30 p-4">
               <h4 className="text-lg font-bold text-green-400 mb-3">Sources des entrées</h4>
               <div className="space-y-3">
@@ -471,7 +458,6 @@ const StackedAreaChart = () => {
               </div>
             </div>
 
-            {/* Détails des sorties */}
             <div className="bg-gray-700/30 rounded-lg border border-pink-500/30 p-4">
               <h4 className="text-lg font-bold text-pink-400 mb-3">Répartition des sorties</h4>
               <div className="space-y-3">
@@ -495,7 +481,6 @@ const StackedAreaChart = () => {
         )}
       </div>
 
-      {/* Recommandations */}
       <div className="mt-6 bg-gray-800/40 rounded-xl border border-yellow-500/30 p-6">
         <h3 className="text-lg font-bold text-yellow-400 mb-4">Recommandations stratégiques</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -519,7 +504,6 @@ const StackedAreaChart = () => {
         </div>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

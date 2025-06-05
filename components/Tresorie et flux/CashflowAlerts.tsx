@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 import { FiAlertTriangle, FiBell, FiChevronDown} from 'react-icons/fi';
 
-// Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -32,7 +31,6 @@ const CashflowAlerts = () => {
   const [lineGradient, setLineGradient] = useState<CanvasGradient | string | null>(null);
   const [expandedAlert, setExpandedAlert] = useState<number | null>(null);
 
-  // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
     green: '#39ff14',
@@ -42,7 +40,6 @@ const CashflowAlerts = () => {
     blue: '#00b4d8'
   };
 
-  // Créer le gradient pour la courbe principale
   useEffect(() => {
     if (containerRef.current) {
       const canvas = containerRef.current.querySelector('canvas');
@@ -58,7 +55,6 @@ const CashflowAlerts = () => {
     }
   }, []);
 
-  // Données pour le graphique
   const data: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
     datasets: [
@@ -109,7 +105,6 @@ const CashflowAlerts = () => {
     ],
   };
 
-  // Options pour le graphique avec style néon
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -195,7 +190,6 @@ const CashflowAlerts = () => {
     }
   };
 
-  // Alertes de trésorerie
   const alerts = [
     {
       id: 1,
@@ -244,7 +238,6 @@ const CashflowAlerts = () => {
     }
   ];
 
-  // Calcul du statut actuel
   const currentStatus = () => {
     const currentValue = data.datasets[0].data[data.datasets[0].data.length - 1] as number;
     
@@ -288,7 +281,6 @@ const CashflowAlerts = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="
           p-4 rounded-xl
@@ -351,7 +343,6 @@ const CashflowAlerts = () => {
         </div>
       </div>
 
-      {/* Graphique en ligne */}
       <div 
         className="bg-gray-800/40 rounded-xl border border-cyan-500/30 p-6 mb-6"
         ref={containerRef}
@@ -361,7 +352,6 @@ const CashflowAlerts = () => {
         </div>
       </div>
 
-      {/* Alertes actives */}
       <div className="mb-6">
         <h3 className="text-lg font-bold text-pink-400 mb-4 flex items-center">
           <FiAlertTriangle className="mr-2" />
@@ -506,7 +496,6 @@ const CashflowAlerts = () => {
         </div>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

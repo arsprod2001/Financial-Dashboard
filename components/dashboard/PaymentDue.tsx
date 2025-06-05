@@ -112,7 +112,6 @@ const PaymentDue = () => {
               </span>
             </div>
 
-            {/* Hover effect */}
             <div className="
               absolute inset-0 rounded-lg 
               bg-gradient-to-br from-cyan-500/10 to-blue-500/5 

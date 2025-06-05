@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FiFilter, FiSearch, FiDownload, FiPlus, FiEdit2, FiTrash2, FiChevronDown } from 'react-icons/fi';
 
-// Définir les types
 type ExpenseStatus = 'Planifié' | 'Payé' | 'En attente' | 'Annulé';
 type ExpenseFrequency = 'Mensuel' | 'Trimestriel' | 'Variable';
 
@@ -33,7 +32,6 @@ const PlannedExpensesTable = () => {
     direction: 'asc' 
   });
 
-  // Données pour les dépenses planifiées
   const expenses: Expense[] = [
     {
       id: 1,
@@ -109,7 +107,6 @@ const PlannedExpensesTable = () => {
     }
   ];
 
-  // Fonction pour déterminer la couleur du statut
   const getStatusColor = (status: ExpenseStatus) => {
     switch (status) {
       case 'Planifié':
@@ -125,7 +122,6 @@ const PlannedExpensesTable = () => {
     }
   };
 
-  // Fonction de tri
   const sortedExpenses = [...expenses].sort((a, b) => {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
@@ -139,7 +135,6 @@ const PlannedExpensesTable = () => {
     return 0;
   });
 
-  // Filtrage et recherche
   const filteredExpenses = sortedExpenses
     .filter(expense => 
       filter === 'toutes' || expense.status === filter
@@ -149,7 +144,6 @@ const PlannedExpensesTable = () => {
       expense.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  // Gestion du tri
   const requestSort = (key: keyof Expense) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -158,7 +152,6 @@ const PlannedExpensesTable = () => {
     setSortConfig({ key, direction });
   };
 
-  // Toggle détails
   const toggleDetails = (id: number) => {
     setShowDetails(prev => ({
       ...prev,
@@ -206,7 +199,6 @@ const PlannedExpensesTable = () => {
         </div>
       </div>
 
-      {/* Contrôles de filtrage */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="flex flex-wrap gap-2">
           {(['toutes', 'Planifié', 'Payé', 'En attente', 'Annulé'] as const).map(status => (
@@ -337,7 +329,6 @@ const PlannedExpensesTable = () => {
                   </td>
                 </tr>
                 
-                {/* Détails supplémentaires */}
                 {showDetails[expense.id] && (
                   <tr className="bg-gray-800/40 border-t border-gray-700/50">
                     <td colSpan={5} className="px-6 py-4">
@@ -374,7 +365,6 @@ const PlannedExpensesTable = () => {
         </table>
       </div>
 
-      {/* Résumé et actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="bg-gray-800/40 rounded-xl border border-green-500/30 p-6">
           <h3 className="text-lg font-bold text-green-400 mb-4">Résumé des dépenses</h3>
@@ -427,7 +417,6 @@ const PlannedExpensesTable = () => {
         </div>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

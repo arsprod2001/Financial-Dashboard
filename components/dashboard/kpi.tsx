@@ -18,7 +18,6 @@ const Kpi = ({ revenue = 15000, comparison = 5 }) => {
       "
       tabIndex={0}
     >
-      {/* Animated gradient border */}
       <div className="absolute top-0 inset-x-0 h-1 rounded-t-xl bg-gradient-to-r from-green-400 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div className="flex items-start justify-between">

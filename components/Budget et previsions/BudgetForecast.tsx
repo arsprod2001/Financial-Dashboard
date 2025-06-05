@@ -64,7 +64,6 @@ const BudgetForecast = () => {
       const barCtx = barChartRef.current.ctx;
       const lineCtx = lineChartRef.current.ctx;
 
-      // Création des gradients avec vérification de sécurité
       const budgetGradient = barCtx.createLinearGradient(0, 0, 0, 400);
       budgetGradient.addColorStop(0, `${neonColors.cyan}80`);
       budgetGradient.addColorStop(1, `${neonColors.cyan}20`);
@@ -216,12 +215,11 @@ const BudgetForecast = () => {
     },
     animation: {
       duration: 800,
-      easing: 'easeOutQuart' as const // Type spécifique
+      easing: 'easeOutQuart' as const 
     }
   };
 
 
- // Remplacer la déclaration de lineChartOptions par :
 const lineChartOptions: ChartOptions<'line'> = {
   responsive: true,
   maintainAspectRatio: false,
@@ -306,7 +304,6 @@ const lineChartOptions: ChartOptions<'line'> = {
   }
 };
 
-  // Calcul des indicateurs
   const calculateKPIs = () => {
     const budgetTotal = budgetData.datasets[0].data.reduce((sum, val) => sum + val, 0);
     const actualTotal = budgetData.datasets[1].data.reduce((sum, val) => sum + val, 0);
@@ -459,7 +456,6 @@ const lineChartOptions: ChartOptions<'line'> = {
         </div>
       </div>
 
-      {/* Navigation par onglets */}
       <div className="flex mb-6 border-b border-cyan-500/30">
         {['budget', 'prévisions', 'analyse', 'optimisation'].map(tab => (
           <button

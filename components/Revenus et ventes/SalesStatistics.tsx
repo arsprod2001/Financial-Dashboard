@@ -35,7 +35,6 @@ ChartJS.register(
   Filler
 );
 
-// Définition des types
 interface Alert {
   id: number;
   message: string;
@@ -90,7 +89,6 @@ const SalesStatistics = () => {
   const lineChartRef = useRef<Chart<'line', number[], string> | null>(null);
   const [lineGradient, setLineGradient] = useState<CanvasGradient | null>(null);
   const [barGradient, setBarGradient] = useState<CanvasGradient | null>(null);
-  // Couleurs néon
   const neonColors = {
     cyan: '#00f3ff',
     purple: '#bc00ff',
@@ -99,7 +97,6 @@ const SalesStatistics = () => {
     green: '#39ff14'
   };
 
-  // Configuration des données
   const conversionRateData: ChartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [{
@@ -140,7 +137,6 @@ const SalesStatistics = () => {
     }],
   };
 
-  // Ajout des données de comparaison si activé
   if (comparisonMode) {
     salesData.datasets.push({
       label: 'Ventes année précédente (k€)',
@@ -157,7 +153,6 @@ const SalesStatistics = () => {
     });
   }
 
-  // Création des gradients
   useEffect(() => {
     if (lineChartRef.current && lineChartRef.current.ctx) {
       const ctx = lineChartRef.current.ctx;
@@ -173,7 +168,6 @@ const SalesStatistics = () => {
     }
   }, [period]);
 
-  // Calcul des indicateurs
   const calculateKPIs = (): KPI => {
     const conversionData = conversionRateData.datasets[0].data;
     const sales = salesData.datasets[0].data;
@@ -303,17 +297,14 @@ const SalesStatistics = () => {
     }
   };
 
-  // Actions
   const exportData = (format: string) => {
     console.log(`Exporting data in ${format} format`);
-    // Logique d'exportation réelle irait ici
   };
 
   const addAlert = (message: string, type: 'success' | 'warning' | 'error' | 'info') => {
     const newAlert = { id: Date.now(), message, type };
     setAlerts([...alerts, newAlert]);
 
-    // Supprimer l'alerte après 5 secondes
     setTimeout(() => {
       setAlerts(alerts.filter(alert => alert.id !== newAlert.id));
     }, 5000);

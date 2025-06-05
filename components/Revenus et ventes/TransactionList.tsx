@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FiEye, FiDownload, FiPrinter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-// Définition des types
 interface Transaction {
   id: number;
   client: string;
@@ -45,7 +44,6 @@ const TransactionList = () => {
       status: 'payée',
       dueDate: '2023-10-20',
     },
-    // Ajout de nouvelles transactions pour tester la pagination
     {
       id: 5,
       client: 'Client E',
@@ -80,12 +78,10 @@ const TransactionList = () => {
     },
   ];
 
-  // État de pagination
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 4;
   const totalPages = Math.ceil(allTransactions.length / transactionsPerPage);
 
-  // Calcul des transactions à afficher
   const indexOfLastTransaction = currentPage * transactionsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
   const currentTransactions = allTransactions.slice(
@@ -93,7 +89,6 @@ const TransactionList = () => {
     indexOfLastTransaction
   );
 
-  // Styles dynamiques pour le statut
   const getStatusStyle = (status: 'payée' | 'en attente' | 'en retard') => {
     switch (status) {
       case 'payée':
@@ -107,7 +102,6 @@ const TransactionList = () => {
     }
   };
 
-  // Navigation entre les pages
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -126,7 +120,7 @@ const TransactionList = () => {
     }
   };
 
-  // Actions
+  
   const viewDetails = (id: number) => {
     console.log(`View details for transaction ${id}`);
   };
@@ -135,7 +129,6 @@ const TransactionList = () => {
     console.log(`Download invoice for transaction ${id}`);
   };
 
-  // Génération des boutons de pagination
   const renderPageButtons = () => {
     const buttons = [];
     const maxVisibleButtons = 5;
@@ -259,7 +252,6 @@ const TransactionList = () => {
               {transaction.dueDate}
             </div>
             
-            {/* Boutons d'action */}
             <div className="flex space-x-2 justify-end">
               <button 
                 onClick={() => viewDetails(transaction.id)}
@@ -303,7 +295,6 @@ const TransactionList = () => {
               </button>
             </div>
 
-            {/* Hover effect */}
             <div className="
               absolute inset-0 rounded-lg 
               bg-gradient-to-br from-cyan-500/10 to-blue-500/5 
@@ -314,7 +305,6 @@ const TransactionList = () => {
         ))}
       </div>
 
-      {/* Pagination améliorée */}
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="text-cyan-400/60 text-sm">
           Affichage {indexOfFirstTransaction + 1}-{Math.min(indexOfLastTransaction, allTransactions.length)} 
@@ -356,7 +346,6 @@ const TransactionList = () => {
         </div>
       </div>
 
-      {/* Effet de lueur */}
       <div className="
         absolute inset-0 rounded-xl 
         bg-gradient-to-br from-cyan-500/10 to-blue-500/10 

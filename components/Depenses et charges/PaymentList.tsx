@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FiSearch, FiDownload, FiPrinter, FiEye, FiDollarSign, FiCalendar, FiUser } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
-// Définir les types
 type PaymentStatus = 'payé' | 'en attente' | 'annulé';
 type FilterOption = 'all' | 'paid' | 'pending' | 'cancelled';
 

@@ -13,7 +13,6 @@ import {
   ChartOptions
 } from 'chart.js';
 
-// Enregistrer les composants nécessaires de Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,10 +24,8 @@ ChartJS.register(
 );
 
 const CashflowChart = () => {
-  // État pour la période sélectionnée
-  const [period, setPeriod] = useState('mois'); // Options : mois, trimestre, année
+  const [period, setPeriod] = useState('mois'); 
 
-  // Typage des données du graphique
   const monthlyData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
@@ -89,7 +86,6 @@ const CashflowChart = () => {
     ],
   };
 
-  // Fonction pour sélectionner les données en fonction de la période
   const getChartData = (): ChartData<'line'> => {
     switch (period) {
       case 'mois':
@@ -103,12 +99,11 @@ const CashflowChart = () => {
     }
   };
 
-  // Options pour le graphique en ligne avec typage strict
   const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top' as const, // Type assertion for literal value
+        position: 'top' as const, 
       },
       title: {
         display: true,
@@ -121,7 +116,6 @@ const CashflowChart = () => {
     <div className="max-w-4xl mx-auto my-8 p-6 bg-gray-50 rounded-lg shadow-sm">
       <h2 className="text-2xl font-semibold text-gray-800 mb-6">Graphique des entrées et sorties</h2>
 
-      {/* Filtres pour la période */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">Période :</label>
         <select
@@ -135,7 +129,6 @@ const CashflowChart = () => {
         </select>
       </div>
 
-      {/* Graphique en ligne */}
       <div className="p-6 bg-white rounded-lg shadow-sm">
         <Line data={getChartData()} options={chartOptions} />
       </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FiAlertCircle, FiCalendar, FiSend, FiRefreshCw, FiDownload, FiPrinter } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
-// Définir les types
 type InvoiceStatus = 'en attente' | 'en retard';
 interface Invoice {
   id: number;
@@ -90,12 +89,11 @@ const PendingInvoices = () => {
   };
 
   const totalPending = invoices.reduce((sum, invoice) => {
-    // Convertir le montant en nombre
     const amountValue = parseFloat(
       invoice.amount
-        .replace(/\s/g, '')   // Supprimer les espaces
-        .replace(',', '.')    // Remplacer la virgule par un point
-        .replace('$', '')     // Supprimer le symbole dollar
+        .replace(/\s/g, '')   
+        .replace(',', '.')    
+        .replace('$', '')    
     );
     return sum + (isNaN(amountValue) ? 0 : amountValue);
   }, 0);

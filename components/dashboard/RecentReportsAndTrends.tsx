@@ -25,7 +25,6 @@ ChartJS.register(
 );
 
 const RecentReportsAndTrends = () => {
-  // Définir le type pour les données du graphique
   const profitMarginData: ChartData<'line'> = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [{
@@ -54,7 +53,6 @@ const RecentReportsAndTrends = () => {
     }],
   };
 
-  // Configuration de base pour les graphiques
   const baseChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -84,7 +82,6 @@ const RecentReportsAndTrends = () => {
         ticks: { color: '#00f3ff', font: { weight: 'bold' } }
       }
     },
-    // Correction de la configuration d'animation
     animation: {
       duration: 1000,
       easing: 'easeOutCubic'
@@ -110,7 +107,7 @@ const RecentReportsAndTrends = () => {
       title: { 
         ...baseChartOptions.plugins?.title,
         text: 'PERFORMANCE FINANCIÈRE',
-        color: '#bc00ff' // Couleur spécifique pour ce graphique
+        color: '#bc00ff' 
       }
     }
   };

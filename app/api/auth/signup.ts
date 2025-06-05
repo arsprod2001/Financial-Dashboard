@@ -15,13 +15,13 @@ export default async function handler(
 
   const { email, password } = req.body
 
-  // Validation des données
+  
   if (!email || !password) {
     return res.status(400).json({ error: 'Email et mot de passe requis' })
   }
 
   try {
-    // Vérifier si l'email existe déjà
+   
     const existingUser = await prisma.user.findUnique({
       where: { email }
     })
@@ -30,10 +30,10 @@ export default async function handler(
       return res.status(400).json({ error: 'Email déjà utilisé' })
     }
 
-    // Hachage du mot de passe
+    
     const hashedPassword = await bcrypt.hash(password, 12)
     
-    // Création de l'utilisateur
+    
     const user = await prisma.user.create({
       data: { 
         email, 
@@ -41,10 +41,10 @@ export default async function handler(
       }
     })
 
-    // Génération du token JWT
+    
     const token = createToken(user.id)
 
-    // Configuration du cookie sécurisé
+    
     res.setHeader('Set-Cookie', [
       `token=${token}; ` +
       `HttpOnly; ` +
@@ -54,7 +54,7 @@ export default async function handler(
       `${process.env.NODE_ENV === 'production' ? 'Secure; ' : ''}`
     ])
 
-    // Réponse sans le mot de passe
+    
     return res.status(201).json({ 
       user: { 
         id: user.id, 

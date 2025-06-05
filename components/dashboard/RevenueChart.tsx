@@ -117,7 +117,6 @@ const RevenueChart = () => {
         }
       }
     },
-    // Using type assertion for animation due to complex ChartJS types
     animation: {
       tension: {
         duration: 1000,

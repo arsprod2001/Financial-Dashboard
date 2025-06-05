@@ -55,7 +55,7 @@ const ExpensesChart = () => {
         tension: 0.4,
         pointRadius: 4,
         pointHoverRadius: 8,
-        fill: 'origin' as const,  // Use string literal instead of object
+        fill: 'origin' as const,  
       },
     ],
   };

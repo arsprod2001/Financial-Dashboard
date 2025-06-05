@@ -8,7 +8,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  type ChartOptions,       // <- on importe le type
+  type ChartOptions,      
 } from 'chart.js';
 
 ChartJS.register(
@@ -34,12 +34,11 @@ const RevenueSummary = () => {
     ],
   };
 
-  // 1) On précise que chartOptions est de type ChartOptions<'bar'>
   const chartOptions: ChartOptions<'bar'> = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top', // <-- 'top' est un littéral valide dans ChartOptions<'bar'>
+        position: 'top', 
       },
       title: {
         display: true,
@@ -72,7 +71,7 @@ const RevenueSummary = () => {
         <div className="p-6 bg-white rounded-lg shadow-sm">
           <Bar
             data={monthlyComparisonData}
-            options={chartOptions} // <- ici, chartOptions est correctement typé
+            options={chartOptions} 
           />
         </div>
       </div>

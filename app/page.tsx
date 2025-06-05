@@ -80,7 +80,6 @@ const DashboardPage = () => {
   */
 
 
-  // Effet pour détecter le défilement
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -89,7 +88,6 @@ const DashboardPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Navigation items
   const navItems = [
     { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { id: 'Revenus et ventes', icon: <TrendingUp size={20} />, label: 'Revenus et ventes' },
@@ -102,7 +100,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col ">
-      {/* Header Fixe */}
       <header className={`
         fixed top-0 left-0 right-0 z-40 transition-all duration-300
         ${isScrolled
@@ -112,7 +109,6 @@ const DashboardPage = () => {
       `}>
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
-            {/* Bouton Menu Mobile */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-lg hover:bg-gray-800 transition-all"
@@ -121,7 +117,6 @@ const DashboardPage = () => {
               <span className="sr-only">Menu</span>
             </button>
 
-            {/* Bouton Toggle Sidebar Desktop */}
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className="hidden md:flex items-center justify-center p-2 rounded-lg hover:bg-gray-800 transition-all"
@@ -130,7 +125,6 @@ const DashboardPage = () => {
               <span className="sr-only">Toggle Sidebar</span>
             </button>
 
-            {/* Titre du Dashboard */}
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -140,9 +134,7 @@ const DashboardPage = () => {
             </motion.h1>
           </div>
 
-          {/* Actions Header */}
           <div className="flex items-center gap-3">
-            {/* Barre de recherche élégante */}
             <div className={`relative transition-all ${showSearch ? 'w-64' : 'w-10'}`}>
               {showSearch ? (
                 <motion.div
@@ -174,14 +166,12 @@ const DashboardPage = () => {
               )}
             </div>
 
-            {/* Notification */}
             <button className="p-2 rounded-lg hover:bg-gray-800 transition-all relative">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               <span className="sr-only">Notifications</span>
             </button>
 
-            {/* Profil Utilisateur */}
             <div className="relative group">
               <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-800 transition-all">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center">
@@ -204,7 +194,6 @@ const DashboardPage = () => {
         </div>
       </header>
 
-      {/* Sidebar */}
       <div
         className={`
           fixed top-0 h-full z-30 transition-all duration-300 ease-in-out
@@ -238,7 +227,6 @@ const DashboardPage = () => {
             ))}
           </nav>
 
-          {/* Footer Sidebar */}
           <div className={`p-4 border-t border-gray-800 ${isSidebarCollapsed ? 'text-center' : ''}`}>
             <button className="flex items-center gap-2 text-gray-400 hover:text-gray-200 transition-colors">
               <Settings size={18} />
@@ -250,7 +238,6 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Overlay Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -263,7 +250,6 @@ const DashboardPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <div
         className={`
           flex-1 transition-all duration-300 pt-16
@@ -271,17 +257,14 @@ const DashboardPage = () => {
         `}
       >
         <div className="p-4 md:p-6">
-          {/* Dynamic Content */}
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Dashboard */}
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
-                {/* ... (contenu du dashboard) ... */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <CashBalanceKPI />
                   <Kpi />
@@ -289,7 +272,6 @@ const DashboardPage = () => {
                   <TotalExpensesKPI />
                 </div>
 
-                {/* Visualisations */}
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <RevenueChart />
@@ -298,14 +280,12 @@ const DashboardPage = () => {
                   <CashflowChart />
                 </div>
 
-                {/* Alertes */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Notifications />
                   <PaymentDue />
                   <FinancialAnomalies />
                 </div>
 
-                {/* Rapports */}
                 <div className="grid grid-cols-1">
                   <RecentReportsAndTrends />
                 </div>

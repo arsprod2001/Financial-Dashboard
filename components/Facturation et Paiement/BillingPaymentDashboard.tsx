@@ -16,7 +16,6 @@ ChartJS.register(
   Legend
 );
 
-// Définition des types
 type InvoiceStatus = 'payée' | 'en attente' | 'en retard' | 'partiellement payée';
 type TabFilter = 'toutes' | InvoiceStatus;
 
@@ -70,7 +69,6 @@ const BillingPaymentDashboard = () => {
     ],
   };
 
-  // Correction du type pour les options du graphique
   const chartOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -86,7 +84,6 @@ const BillingPaymentDashboard = () => {
           },
           padding: 20,
           usePointStyle: true,
-          // propriétés optionnelles ignorées ici
         }
       },
       tooltip: {
@@ -102,7 +99,6 @@ const BillingPaymentDashboard = () => {
         callbacks: {
           label: (ctx: TooltipItem<'pie'>) =>
             ` ${ctx.parsed} factures (${Math.round(ctx.parsed)}%)`,
-          // Fournir les autres callbacks (même vides pour satisfaire TS)
           title: () => '',
           afterTitle: () => '',
           beforeTitle: () => '',

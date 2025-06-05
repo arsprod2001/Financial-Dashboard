@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Définir les types pour les paramètres
 type PriorityLevel = 'high' | 'medium' | 'low';
 
 interface Notification {
