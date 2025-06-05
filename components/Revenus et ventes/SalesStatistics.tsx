@@ -1,5 +1,4 @@
 
-{/** 
 import React, { useState, useRef, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import {
@@ -19,7 +18,7 @@ import {
   ChartType,
   TooltipItem,
 } from 'chart.js';
-import { 
+import {
   FiTrendingUp, FiDollarSign, FiRefreshCw, FiCalendar, FiDownload, FiZoomIn, FiBarChart2,
   FiPlus, FiMinus, FiAlertCircle, FiShoppingCart
 } from 'react-icons/fi';
@@ -83,12 +82,12 @@ interface KPI {
 }
 
 const SalesStatistics = () => {
-   const [period, setPeriod] = useState<PeriodType>('mois');
+  const [period, setPeriod] = useState<PeriodType>('mois');
   const [activeChart, setActiveChart] = useState<ActiveChartType>('both');
   const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null);
   const [comparisonMode, setComparisonMode] = useState<boolean>(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const lineChartRef = useRef<Chart<ChartType, number[], string> | null>(null);
+  const lineChartRef = useRef<Chart<'line', number[], string> | null>(null);
   const [lineGradient, setLineGradient] = useState<CanvasGradient | null>(null);
   const [barGradient, setBarGradient] = useState<CanvasGradient | null>(null);
   // Couleurs néon
@@ -166,7 +165,7 @@ const SalesStatistics = () => {
       gradient.addColorStop(0, `${neonColors.cyan}40`);
       gradient.addColorStop(1, `${neonColors.cyan}00`);
       setLineGradient(gradient);
-      
+
       const barGrad = ctx.createLinearGradient(0, 0, 0, 400);
       barGrad.addColorStop(0, `${neonColors.purple}80`);
       barGrad.addColorStop(1, `${neonColors.purple}20`);
@@ -178,18 +177,18 @@ const SalesStatistics = () => {
   const calculateKPIs = (): KPI => {
     const conversionData = conversionRateData.datasets[0].data;
     const sales = salesData.datasets[0].data;
-    
+
     const totalSales = sales.reduce((sum, val) => sum + val, 0);
     const avgConversion = (conversionData.reduce((sum, val) => sum + val, 0) / conversionData.length).toFixed(1);
     const maxSales = Math.max(...sales);
     const maxMonth = salesData.labels[sales.indexOf(maxSales)];
-    
+
     const lastPeriodSales = sales[sales.length - 1];
     const previousPeriodSales = sales[sales.length - 2];
-    const salesGrowth = previousPeriodSales 
+    const salesGrowth = previousPeriodSales
       ? parseFloat(((lastPeriodSales - previousPeriodSales) / previousPeriodSales * 100).toFixed(1))
       : 0;
-    
+
     return {
       totalSales: `${totalSales} k€`,
       avgConversion: `${avgConversion}%`,
@@ -286,7 +285,7 @@ const SalesStatistics = () => {
         const element = elements[0];
         const datasetIndex = element.datasetIndex;
         const index = element.index;
-        
+
         if (activeChart === 'both' || activeChart === 'conversion') {
           setSelectedPoint({
             type: 'conversion',
@@ -313,7 +312,7 @@ const SalesStatistics = () => {
   const addAlert = (message: string, type: 'success' | 'warning' | 'error' | 'info') => {
     const newAlert = { id: Date.now(), message, type };
     setAlerts([...alerts, newAlert]);
-    
+
     // Supprimer l'alerte après 5 secondes
     setTimeout(() => {
       setAlerts(alerts.filter(alert => alert.id !== newAlert.id));
@@ -324,11 +323,11 @@ const SalesStatistics = () => {
     const conversionData = conversionRateData.datasets[0].data;
     const maxConversion = Math.max(...conversionData);
     const minConversion = Math.min(...conversionData);
-    
+
     return `Votre taux de conversion varie entre ${minConversion}% et ${maxConversion}%. 
             Les meilleures performances sont observées en ${conversionRateData.labels[
-              conversionData.indexOf(maxConversion)
-            ]}.`;
+      conversionData.indexOf(maxConversion)
+      ]}.`;
   };
 
   return (
@@ -342,12 +341,12 @@ const SalesStatistics = () => {
     ">
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {alerts.map(alert => (
-          <div 
+          <div
             key={alert.id}
             className={`
               p-3 rounded-lg border shadow-lg
-              ${alert.type === 'success' 
-                ? 'bg-green-900/80 border-green-500/50 text-green-400' 
+              ${alert.type === 'success'
+                ? 'bg-green-900/80 border-green-500/50 text-green-400'
                 : alert.type === 'warning'
                   ? 'bg-yellow-900/80 border-yellow-500/50 text-yellow-400'
                   : 'bg-red-900/80 border-red-500/50 text-red-400'}
@@ -370,15 +369,15 @@ const SalesStatistics = () => {
           ">
             ANALYTIQUE DES VENTES
           </h2>
-          
+
           <div className="mt-2 flex items-center text-cyan-400/80">
             <FiTrendingUp className="mr-2" />
             <span>Performances et tendances des ventes</span>
           </div>
         </div>
-        
+
         <div className="flex space-x-3">
-          <button 
+          <button
             className="
               p-2 rounded-lg
               bg-gradient-to-r from-cyan-500/20 to-blue-500/20
@@ -393,7 +392,7 @@ const SalesStatistics = () => {
             <FiRefreshCw className="mr-2" />
             Actualiser
           </button>
-          
+
           <div className="relative group">
             <button className="
               p-2 rounded-lg
@@ -413,19 +412,19 @@ const SalesStatistics = () => {
               opacity-0 invisible group-hover:opacity-100 group-hover:visible
               transition-all duration-300 z-10
             ">
-              <button 
+              <button
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-cyan-500/10 text-cyan-400"
                 onClick={() => exportData('PDF')}
               >
                 Exporter en PDF
               </button>
-              <button 
+              <button
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-cyan-500/10 text-cyan-400"
                 onClick={() => exportData('CSV')}
               >
                 Exporter en CSV
               </button>
-              <button 
+              <button
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-cyan-500/10 text-cyan-400"
                 onClick={() => exportData('Excel')}
               >
@@ -451,14 +450,14 @@ const SalesStatistics = () => {
           <div className="text-2xl font-bold text-cyan-300 mt-1">
             {kpis.totalSales}
           </div>
-          <button 
+          <button
             className="absolute top-3 right-3 text-cyan-400 hover:text-cyan-300"
             onClick={() => addAlert(`Analyse des ventes totales: ${analyzePerformance()}`, 'info')}
           >
             <FiZoomIn size={18} />
           </button>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-purple-900/30 to-fuchsia-900/30
@@ -472,14 +471,14 @@ const SalesStatistics = () => {
           <div className="text-2xl font-bold text-purple-300 mt-1">
             {kpis.avgConversion}
           </div>
-          <button 
+          <button
             className="absolute top-3 right-3 text-purple-400 hover:text-purple-300"
             onClick={() => addAlert(`La conversion moyenne est calculée sur ${conversionRateData.labels.length} périodes.`, 'info')}
           >
             <FiZoomIn size={18} />
           </button>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-pink-900/30 to-rose-900/30
@@ -493,14 +492,14 @@ const SalesStatistics = () => {
           <div className="text-xl font-bold text-pink-300 mt-1">
             {kpis.peakPerformance}
           </div>
-          <button 
+          <button
             className="absolute top-3 right-3 text-pink-400 hover:text-pink-300"
             onClick={() => addAlert(`Période de performance maximale détectée. Envisagez d'analyser les facteurs de succès.`, 'warning')}
           >
             <FiAlertCircle size={18} />
           </button>
         </div>
-        
+
         <div className="
           p-4 rounded-xl
           bg-gradient-to-br from-yellow-900/30 to-amber-900/30
@@ -515,7 +514,7 @@ const SalesStatistics = () => {
           <div className={`text-2xl font-bold mt-1 ${kpis.salesGrowth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {kpis.salesGrowth}%
           </div>
-          <button 
+          <button
             className="absolute top-3 right-3 text-yellow-400 hover:text-yellow-300"
             onClick={() => addAlert(`La croissance est calculée par rapport à la période précédente.`, 'info')}
           >
@@ -557,7 +556,7 @@ const SalesStatistics = () => {
             ))}
           </select>
         </div>
-        
+
         <div className="flex space-x-1">
           {(['both', 'conversion', 'sales'] as ActiveChartType[]).map((type) => (
             <button
@@ -567,36 +566,34 @@ const SalesStatistics = () => {
                 px-4 py-2 rounded-lg
                 transition-all
                 border
-                ${
-                  activeChart === type
-                    ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/50'
-                    : 'bg-gray-800/40 text-cyan-400/60 border-cyan-500/20 hover:bg-cyan-500/10'
+                ${activeChart === type
+                  ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/50'
+                  : 'bg-gray-800/40 text-cyan-400/60 border-cyan-500/20 hover:bg-cyan-500/10'
                 }
               `}
             >
-              {type === 'both' ? 'Les deux' : 
-               type === 'conversion' ? 'Conversion' : 'Ventes'}
+              {type === 'both' ? 'Les deux' :
+                type === 'conversion' ? 'Conversion' : 'Ventes'}
             </button>
           ))}
         </div>
-        
+
         <button
           onClick={() => setComparisonMode(!comparisonMode)}
           className={`
             px-4 py-2 rounded-lg
             transition-all
             border flex items-center
-            ${
-              comparisonMode
-                ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 border-yellow-500/50'
-                : 'bg-gray-800/40 text-yellow-400/60 border-yellow-500/20 hover:bg-yellow-500/10'
+            ${comparisonMode
+              ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 border-yellow-500/50'
+              : 'bg-gray-800/40 text-yellow-400/60 border-yellow-500/20 hover:bg-yellow-500/10'
             }
           `}
         >
           {comparisonMode ? <FiMinus className="mr-2" /> : <FiPlus className="mr-2" />}
           Comparaison
         </button>
-        
+
         <button
           className="
             px-4 py-2 rounded-lg
@@ -627,13 +624,13 @@ const SalesStatistics = () => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-cyan-400">TAUX DE CONVERSION</h3>
               <div className="flex space-x-2">
-                <button 
+                <button
                   className="p-2 rounded-md bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
                   onClick={() => addAlert('Graphique de conversion exporté', 'success')}
                 >
                   <FiDownload size={18} />
                 </button>
-                <button 
+                <button
                   className="p-2 rounded-md bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
                   onClick={() => addAlert('Focus activé sur le graphique de conversion', 'info')}
                 >
@@ -641,7 +638,7 @@ const SalesStatistics = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="h-64">
               <Line
                 ref={lineChartRef}
@@ -655,15 +652,15 @@ const SalesStatistics = () => {
                 }}
               />
             </div>
-            
+
             <div className="mt-4 grid grid-cols-2 md:grid-cols-7 gap-2">
               {conversionRateData.labels.map((label, index) => (
-                <div 
+                <div
                   key={index}
                   className={`
                     p-2 rounded-lg
                     bg-gray-800/40
-                    border ${selectedPoint?.type === 'conversion' && selectedPoint?.period === label 
+                    border ${selectedPoint?.type === 'conversion' && selectedPoint?.period === label
                       ? 'border-cyan-500/50' : 'border-cyan-500/20'}
                     flex flex-col items-center relative
                     cursor-pointer
@@ -679,23 +676,22 @@ const SalesStatistics = () => {
                   <div className="text-sm font-bold text-cyan-400 mt-1">
                     {conversionRateData.datasets[0].data[index]}%
                   </div>
-                  <div className={`mt-1 text-xs ${
-                    index > 0 
-                      ? conversionRateData.datasets[0].data[index] > conversionRateData.datasets[0].data[index-1] 
-                          ? 'text-green-400' 
-                          : 'text-red-400'
-                      : 'text-transparent'
-                  }`}>
+                  <div className={`mt-1 text-xs ${index > 0
+                    ? conversionRateData.datasets[0].data[index] > conversionRateData.datasets[0].data[index - 1]
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                    : 'text-transparent'
+                    }`}>
                     {index > 0 && (
                       <>
-                        {conversionRateData.datasets[0].data[index] > conversionRateData.datasets[0].data[index-1] 
-                          ? '↑' 
+                        {conversionRateData.datasets[0].data[index] > conversionRateData.datasets[0].data[index - 1]
+                          ? '↑'
                           : '↓'}
-                        {Math.abs(conversionRateData.datasets[0].data[index] - conversionRateData.datasets[0].data[index-1])}%
+                        {Math.abs(conversionRateData.datasets[0].data[index] - conversionRateData.datasets[0].data[index - 1])}%
                       </>
                     )}
                   </div>
-                  
+
                   {selectedPoint?.type === 'conversion' && selectedPoint?.period === label && (
                     <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-gray-900"></div>
@@ -721,13 +717,13 @@ const SalesStatistics = () => {
                 {`VENTES ${period.toUpperCase()}S`}
               </h3>
               <div className="flex space-x-2">
-                <button 
+                <button
                   className="p-2 rounded-md bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors"
                   onClick={() => addAlert('Graphique des ventes exporté', 'success')}
                 >
                   <FiDownload size={18} />
                 </button>
-                <button 
+                <button
                   className="p-2 rounded-md bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors"
                   onClick={() => addAlert('Focus activé sur le graphique des ventes', 'info')}
                 >
@@ -735,7 +731,7 @@ const SalesStatistics = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="h-64">
               <Bar
                 data={salesData}
@@ -748,15 +744,15 @@ const SalesStatistics = () => {
                 }}
               />
             </div>
-            
+
             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
               {salesData.labels.map((label, index) => (
-                <div 
+                <div
                   key={index}
                   className={`
                     p-2 rounded-lg
                     bg-gray-800/40
-                    border ${selectedPoint?.type === 'sales' && selectedPoint?.period === label 
+                    border ${selectedPoint?.type === 'sales' && selectedPoint?.period === label
                       ? 'border-purple-500/50' : 'border-purple-500/20'}
                     flex flex-col items-center relative
                     cursor-pointer
@@ -772,23 +768,22 @@ const SalesStatistics = () => {
                   <div className="text-sm font-bold text-purple-400 mt-1">
                     {salesData.datasets[0].data[index]}k
                   </div>
-                  <div className={`mt-1 text-xs ${
-                    index > 0 
-                      ? salesData.datasets[0].data[index] > salesData.datasets[0].data[index-1] 
-                          ? 'text-green-400' 
-                          : 'text-red-400'
-                      : 'text-transparent'
-                  }`}>
+                  <div className={`mt-1 text-xs ${index > 0
+                    ? salesData.datasets[0].data[index] > salesData.datasets[0].data[index - 1]
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                    : 'text-transparent'
+                    }`}>
                     {index > 0 && (
                       <>
-                        {salesData.datasets[0].data[index] > salesData.datasets[0].data[index-1] 
-                          ? '↑' 
+                        {salesData.datasets[0].data[index] > salesData.datasets[0].data[index - 1]
+                          ? '↑'
                           : '↓'}
-                        {Math.abs(salesData.datasets[0].data[index] - salesData.datasets[0].data[index-1])}k
+                        {Math.abs(salesData.datasets[0].data[index] - salesData.datasets[0].data[index - 1])}k
                       </>
                     )}
                   </div>
-                  
+
                   {selectedPoint?.type === 'sales' && selectedPoint?.period === label && (
                     <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-gray-900"></div>
@@ -809,14 +804,14 @@ const SalesStatistics = () => {
                 Actions pour {selectedPoint.period}
               </h3>
               <p className="text-cyan-300">
-                {selectedPoint.type === 'conversion' 
+                {selectedPoint.type === 'conversion'
                   ? `Taux de conversion: ${selectedPoint.value}%`
                   : `Ventes: ${selectedPoint.value}k€`}
               </p>
             </div>
-            
+
             <div className="flex space-x-3">
-              <button 
+              <button
                 className="
                   px-4 py-2 rounded-lg
                   bg-gradient-to-r from-cyan-500/20 to-blue-500/20
@@ -831,8 +826,8 @@ const SalesStatistics = () => {
                 <FiBarChart2 className="mr-2" />
                 Analyser
               </button>
-              
-              <button 
+
+              <button
                 className="
                   px-4 py-2 rounded-lg
                   bg-gradient-to-r from-green-500/20 to-emerald-500/20
@@ -847,8 +842,8 @@ const SalesStatistics = () => {
                 <FiShoppingCart className="mr-2" />
                 Créer campagne
               </button>
-              
-              <button 
+
+              <button
                 className="
                   px-4 py-2 rounded-lg
                   bg-gradient-to-r from-pink-500/20 to-rose-500/20
@@ -863,30 +858,30 @@ const SalesStatistics = () => {
               </button>
             </div>
           </div>
-          
+
           {selectedPoint.type === 'conversion' && (
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-gray-700/30 rounded-lg border border-cyan-500/30">
                 <div className="text-cyan-400/80 mb-2">Recommandation</div>
                 <div className="text-cyan-300">
-                  {selectedPoint.value > 20 
+                  {selectedPoint.value > 20
                     ? 'Maintenir les efforts sur les canaux performants'
                     : 'Renforcer les campagnes marketing ce mois-ci'}
                 </div>
               </div>
-              
+
               <div className="p-4 bg-gray-700/30 rounded-lg border border-green-500/30">
                 <div className="text-green-400/80 mb-2">Objectif</div>
                 <div className="text-green-300">
                   Atteindre {Math.round(selectedPoint.value * 1.15)}% le mois prochain
                 </div>
               </div>
-              
+
               <div className="p-4 bg-gray-700/30 rounded-lg border border-yellow-500/30">
                 <div className="text-yellow-400/80 mb-2">Alertes</div>
                 <div className="text-yellow-300">
-                  {selectedPoint.value < 18 
-                    ? 'Seuil critique détecté - Action requise' 
+                  {selectedPoint.value < 18
+                    ? 'Seuil critique détecté - Action requise'
                     : 'Performance dans la moyenne'}
                 </div>
               </div>
@@ -907,14 +902,3 @@ const SalesStatistics = () => {
 
 export default SalesStatistics;
 
-*/}
-
-import React from 'react'
-
-const SalesStatistics = () => {
-  return (
-    <div></div>
-  )
-}
-
-export default SalesStatistics

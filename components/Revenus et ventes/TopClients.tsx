@@ -1,144 +1,113 @@
-{/** 
 import React, { useState } from 'react';
 import { FiTrendingUp, FiStar, FiMail, FiUser } from 'react-icons/fi';
 import ContactClientModal from "@/components/ContactClientModal";
 import ClientDetailsModal from "@/components/ClientDetailsModal";
 import ClientsListModal from "@/components/ClientsListModal";
 
+// Définition du type Client pour TypeScript
+type Client = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  status: string;
+  paymentMethod: string;
+  totalSpent: string;
+  transactions: number;
+  lastTransaction: string;
+  growth: number;
+  loyaltyLevel: number;
+  lastContact: string;
+};
 
 const TopClients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenDetails, setIsModalOpenDetails] = useState(false);
   const [showClientsModal, setShowClientsModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
-  const clients = [
+  // Données clients unifiées avec toutes les propriétés nécessaires
+  const clientsData: Client[] = [
     {
       id: 1,
-      name: 'Client A',
-      totalSpent: '25 000,00 €',
-      purchases: 45,
-      growth: 12.5,
-      loyaltyLevel: 5,
-      lastContact: '2023-10-15'
-    },
-    {
-      id: 2,
-      name: 'Client B',
-      totalSpent: '22 500,00 €',
-      purchases: 38,
-      growth: 8.2,
-      loyaltyLevel: 4,
-      lastContact: '2023-10-18'
-    },
-    {
-      id: 3,
-      name: 'Client C',
-      totalSpent: '20 000,00 €',
-      purchases: 42,
-      growth: -3.4,
-      loyaltyLevel: 5,
-      lastContact: '2023-09-28'
-    },
-    {
-      id: 4,
-      name: 'Client D',
-      totalSpent: '18 750,00 €',
-      purchases: 35,
-      growth: 15.7,
-      loyaltyLevel: 3,
-      lastContact: '2023-10-20'
-    },
-    {
-      id: 5,
-      name: 'Client E',
-      totalSpent: '16 000,00 €',
-      purchases: 30,
-      growth: 5.3,
-      loyaltyLevel: 2,
-      lastContact: '2023-10-05'
-    },
-  ];
-
-
-  const DonneesClients = [
-    {
-      id: 1,
-      name: "Marie Dupont",
+      name: 'Marie Dupont',
       email: "marie.dupont@example.com",
       phone: "+33 6 12 34 56 78",
       status: "VIP",
       paymentMethod: "Carte de crédit",
-      totalSpent: "15 200,00 €",
-      transactions: 24,
+      totalSpent: "25 000,00 €",
+      transactions: 45,
       lastTransaction: "2023-10-15",
+      growth: 12.5,
+      loyaltyLevel: 5,
+      lastContact: "2023-10-15"
     },
     {
       id: 2,
-      name: "Jean Martin",
+      name: 'Jean Martin',
       email: "jean.martin@example.com",
       phone: "+33 6 23 45 67 89",
       status: "Actif",
       paymentMethod: "PayPal",
-      totalSpent: "8 750,00 €",
-      transactions: 15,
-      lastTransaction: "2023-10-12",
+      totalSpent: "22 500,00 €",
+      transactions: 38,
+      lastTransaction: "2023-10-18",
+      growth: 8.2,
+      loyaltyLevel: 4,
+      lastContact: "2023-10-18"
     },
     {
       id: 3,
-      name: "Sophie Leroy",
+      name: 'Sophie Leroy',
       email: "sophie.leroy@example.com",
       phone: "+33 6 34 56 78 90",
       status: "VIP",
       paymentMethod: "Virement bancaire",
-      totalSpent: "22 500,00 €",
-      transactions: 32,
+      totalSpent: "20 000,00 €",
+      transactions: 42,
       lastTransaction: "2023-10-10",
+      growth: -3.4,
+      loyaltyLevel: 5,
+      lastContact: "2023-09-28"
     },
     {
       id: 4,
-      name: "Thomas Bernard",
+      name: 'Thomas Bernard',
       email: "thomas.bernard@example.com",
       phone: "+33 6 45 67 89 01",
       status: "Inactif",
       paymentMethod: "Carte de crédit",
-      totalSpent: "3 200,00 €",
-      transactions: 8,
-      lastTransaction: "2023-09-28",
+      totalSpent: "18 750,00 €",
+      transactions: 35,
+      lastTransaction: "2023-10-20",
+      growth: 15.7,
+      loyaltyLevel: 3,
+      lastContact: "2023-10-20"
     },
     {
       id: 5,
-      name: "Émilie Petit",
+      name: 'Émilie Petit',
       email: "emilie.petit@example.com",
       phone: "+33 6 56 78 90 12",
       status: "Actif",
       paymentMethod: "Espèces",
-      totalSpent: "5 600,00 €",
-      transactions: 12,
+      totalSpent: "16 000,00 €",
+      transactions: 30,
       lastTransaction: "2023-10-05",
+      growth: 5.3,
+      loyaltyLevel: 2,
+      lastContact: "2023-10-05"
     },
-    {
-      id: 6,
-      name: "Nicolas Dubois",
-      email: "nicolas.dubois@example.com",
-      phone: "+33 6 67 89 01 23",
-      status: "Nouveau",
-      paymentMethod: "Carte de crédit",
-      totalSpent: "1 200,00 €",
-      transactions: 3,
-      lastTransaction: "2023-10-14",
-    },
-  ]
+  ];
 
   // Correction de l'erreur de parsing
-  const maxSpent = Math.max(...clients.map(client => {
-    // Convertir la chaîne en nombre
-    const numericValue = parseFloat(
+  const maxSpent = Math.max(...clientsData.map(client => {
+    return parseFloat(
       client.totalSpent
         .replace(/\s/g, '')   // Supprimer tous les espaces
         .replace('€', '')     // Supprimer le symbole euro
         .replace(',', '.')    // Remplacer la virgule par un point
     );
-    return numericValue;
   }));
 
   return (
@@ -192,7 +161,7 @@ const TopClients = () => {
       </div>
 
       <div className="space-y-3">
-        {clients.map((client, index) => {
+        {clientsData.map((client, index) => {
           // Convertir la valeur pour la barre de progression
           const numericValue = parseFloat(
             client.totalSpent
@@ -277,7 +246,7 @@ const TopClients = () => {
                   bg-gradient-to-r from-cyan-500/10 to-blue-500/10 
                   rounded-full
                 ">
-                  {client.purchases} transactions
+                  {client.transactions} transactions
                 </div>
               </div>
 
@@ -300,7 +269,10 @@ const TopClients = () => {
                   transition-colors
                   tooltip
                 " title="Contacter"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => {
+                    setSelectedClient(client);
+                    setIsModalOpen(true);
+                  }}
                 >
                   <FiMail className="w-5 h-5" />
                 </button>
@@ -312,7 +284,10 @@ const TopClients = () => {
                   transition-colors
                   tooltip
                 " title="Détails"
-                  onClick={() => setIsModalOpenDetails(true)}
+                  onClick={() => {
+                    setSelectedClient(client);
+                    setIsModalOpenDetails(true);
+                  }}
                 >
                   <FiUser className="w-5 h-5" />
                 </button>
@@ -331,7 +306,7 @@ const TopClients = () => {
 
       <div className="mt-6 flex justify-between items-center">
         <div className="text-cyan-400/60 text-sm">
-          Affichage 1-{clients.length} de {clients.length} clients VIP
+          Affichage 1-{clientsData.length} de {clientsData.length} clients VIP
         </div>
         <button className="
           px-4 py-2 rounded-lg
@@ -354,24 +329,23 @@ const TopClients = () => {
         transition-opacity pointer-events-none
       "/>
 
-      {isModalOpen && (
+      {isModalOpen && selectedClient && (
         <ContactClientModal
-          client={clients}
+          client={selectedClient}
           onClose={() => setIsModalOpen(false)}
         />
       )}
 
-
-      {isModalOpenDetails && (
+      {isModalOpenDetails && selectedClient && (
         <ClientDetailsModal
-          client={clients}
+          client={selectedClient}
           onClose={() => setIsModalOpenDetails(false)}
         />
       )}
 
       {showClientsModal && (
         <ClientsListModal
-          clients={DonneesClients}
+          clients={clientsData}
           onClose={() => setShowClientsModal(false)}
         />
       )}
@@ -380,17 +354,3 @@ const TopClients = () => {
 };
 
 export default TopClients;
-
-*/}
-
-import React from 'react'
-
-const TopClients = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
-
-export default TopClients
