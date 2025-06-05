@@ -1,3 +1,4 @@
+{/** 
 import { NextApiRequest, NextApiResponse } from 'next'
 import { authenticateUser } from '@/lib/auth'
 
@@ -48,3 +49,5 @@ export default async function handler(
     })
   }
 }
+
+*/}

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+{/*
+  import { PrismaClient } from '@prisma/client'
 
 declare global {
   var prisma: PrismaClient | undefined
@@ -14,11 +15,13 @@ const checkDatabaseConnection = async (client: PrismaClient) => {
   }
 }
 
-const prisma: PrismaClient = global.prisma || new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? 
-    ['query', 'error', 'warn'] : 
-    ['error']
-})
+const prisma =
+  global.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development'
+      ? ['query', 'error', 'warn']
+      : ['error']
+  })
 
 if (process.env.NODE_ENV === 'production') {
   checkDatabaseConnection(prisma).catch((error) => {
@@ -35,14 +38,16 @@ prisma.$use(async (params, next) => {
   const before = Date.now()
   const result = await next(params)
   const after = Date.now()
-  
-  console.log(`Requête ${params.model}.${params.action} exécutée en ${after - before}ms`)
+
+  console.log(
+    `🕒 Requête ${params.model}.${params.action} exécutée en ${after - before}ms`
+  )
   return result
 })
 
 const shutdown = async () => {
   await prisma.$disconnect()
-  console.log('Prisma Client déconnecté proprement')
+  console.log('🔌 Prisma Client déconnecté proprement')
   process.exit(0)
 }
 
@@ -51,3 +56,5 @@ process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
 export default prisma
+*/
+}
